@@ -17,3 +17,5 @@ Frontend: HTML, CSS, JavaScript
 Library: Chart.js, ChartDataLabels
 Data Management: localStorage (tanpa backend)
 Catatan: Seluruh data disimpan secara lokal di browser menggunakan localStorage, tanpa backend/server. Sangat cocok sebagai proyek evaluasi keuangan offline.
+
+Dapat diakses di https://rezhani.github.io/Manajer-Keuangan/
