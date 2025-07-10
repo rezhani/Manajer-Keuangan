@@ -94,7 +94,7 @@
             border: none;
             font-size: 1.1em;
             cursor: pointer;
-            font-weight: 600;
+                    font-weight: 600;
             transition: all 0.3s;
         }
 
@@ -281,8 +281,7 @@
             .container { max-width: 1000px; }
             .history-grid { grid-template-columns: 1fr 1fr; }
             .crud-sections { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1em; }
-			.scrollable-list { max-height: 800px;
-			}
+			.scrollable-list { max-height: 800px; }
 		}
     </style>
 </head>
@@ -410,6 +409,10 @@
                         <option value="gaya_hidup">Gaya Hidup</option>
                         <option value="lain_lain">Lain-lain</option>
                     </select>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1em; margin-bottom: 1em;">
+                        <input type="month" id="startDate" onchange="filterHistory()">
+                        <input type="month" id="endDate" onchange="filterHistory()">
+                    </div>
                     <div class="scrollable-list">
                         <ul id="historyList"></ul>
                     </div>
@@ -693,23 +696,54 @@
             categoryPercentages[cat] = totalAssets ? ((total / totalAssets) * 100).toFixed(1) : 0;
         }
 
+        const startDateInput = document.getElementById('startDate').value;
+        const endDateInput = document.getElementById('endDate').value;
+
+        function parseDate(dateStr) {
+            const parts = dateStr.split(' ');
+            if (parts.length !== 3) return null;
+            const monthNames = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
+            const day = parseInt(parts[0], 10);
+            const month = monthNames.indexOf(parts[1].toLowerCase());
+            const year = parseInt(parts[2], 10);
+            if (month === -1 || isNaN(day) || isNaN(year)) return null;
+            return new Date(year, month, day);
+        }
+
+        let monthlyLifestyleExpenses = 0;
+        if (startDateInput && endDateInput) {
+            const startDate = new Date(startDateInput + '-01');
+            const endDate = new Date(endDateInput + '-01');
+            endDate.setMonth(endDate.getMonth() + 1);
+            endDate.setDate(endDate.getDate() - 1);
+
+            monthlyLifestyleExpenses = jsonData.transaksi
+                .filter(item => {
+                    const itemDate = parseDate(item.date);
+                    return item.expenseType === 'gaya_hidup' && 
+                           item.amount < 0 && 
+                           itemDate >= startDate && 
+                           itemDate <= endDate && 
+                           !isNaN(itemDate.getTime());
+                })
+                .reduce((sum, item) => sum + Math.abs(item.amount), 0);
+        } else {
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            monthlyLifestyleExpenses = jsonData.transaksi
+                .filter(item => {
+                    const itemDate = parseDate(item.date);
+                    return item.expenseType === 'gaya_hidup' && 
+                           item.amount < 0 && 
+                           itemDate >= thirtyDaysAgo && 
+                           !isNaN(itemDate.getTime());
+                })
+                .reduce((sum, item) => sum + Math.abs(item.amount), 0);
+        }
+
         const emergencyFundTarget = monthlyIncome * 6;
         const investmentTarget = totalAssets * 0.3;
         const consumptiveTarget = totalAssets * 0.3;
-
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const monthlyLifestyleExpenses = jsonData.transaksi
-            .filter(item => {
-                const parts = item.date.split(' ');
-                if (parts.length !== 3) return false;
-                const monthNames = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
-                const month = monthNames.indexOf(parts[1].toLowerCase());
-                if (month === -1) return false;
-                const itemDate = new Date(`${parts[2]}-${month + 1}-${parts[0]}`);
-                return item.expenseType === 'gaya_hidup' && item.amount < 0 && itemDate >= thirtyDaysAgo && !isNaN(itemDate.getTime());
-            })
-            .reduce((sum, item) => sum + Math.abs(item.amount), 0);
 
         let evaluation = `<h3>Penilaian Aset</h3><p><strong>Total Aset:</strong> Rp${totalAssets.toLocaleString()}</p><ul>`;
         for (let cat of categories) {
@@ -728,7 +762,7 @@
         evaluation += `<li><strong>Aset Konsumtif:</strong> Rp${consumptiveBalance.toLocaleString()} - ${consumptiveBalance > consumptiveTarget ? `Terlalu besar; batasi Rp${consumptiveTarget.toLocaleString()}` : 'Sesuai'}</li>`;
 
         const lifestyleTarget = monthlyIncome * 0.3;
-        evaluation += `<li><strong>Gaya Hidup (30 hari):</strong> Rp${monthlyLifestyleExpenses.toLocaleString()} - ${monthlyLifestyleExpenses > lifestyleTarget ? `Melebihi Rp${lifestyleTarget.toLocaleString()}` : 'Terkendali'}</li></ul>`;
+        evaluation += `<li><strong>Gaya Hidup (Periode Terpilih):</strong> Rp${monthlyLifestyleExpenses.toLocaleString()} - ${monthlyLifestyleExpenses > lifestyleTarget ? `Melebihi Rp${lifestyleTarget.toLocaleString()}` : 'Terkendali'}</li></ul>`;
 
         evaluation += `<p><strong>Saran:</strong></p><ul>`;
         if (cashBalance < emergencyFundTarget) evaluation += `<li>Tambah Rp${Math.min(monthlyIncome * 0.2, emergencyFundTarget - cashBalance).toLocaleString()}/bulan ke tunai.</li>`;
@@ -745,13 +779,36 @@
 
     // Keuangan Functions
     function createExpenseChart() {
+        const startDateInput = document.getElementById('startDate').value;
+        const endDateInput = document.getElementById('endDate').value;
+
+        function parseDate(dateStr) {
+            const parts = dateStr.split(' ');
+            if (parts.length !== 3) return null;
+            const monthNames = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
+            const day = parseInt(parts[0], 10);
+            const month = monthNames.indexOf(parts[1].toLowerCase());
+            const year = parseInt(parts[2], 10);
+            if (month === -1 || isNaN(day) || isNaN(year)) return null;
+            return new Date(year, month, day);
+        }
+
+        let filteredHistory = history.filter(item => item.expenseType !== 'transfer');
+        if (startDateInput && endDateInput) {
+            const startDate = new Date(startDateInput + '-01');
+            const endDate = new Date(endDateInput + '-01');
+            endDate.setMonth(endDate.getMonth() + 1);
+            endDate.setDate(endDate.getDate() - 1);
+
+            filteredHistory = filteredHistory.filter(item => {
+                const itemDate = parseDate(item.date);
+                return itemDate >= startDate && itemDate <= endDate && !isNaN(itemDate.getTime());
+            });
+        }
+
         const expenseTypes = ['kebutuhan_dasar', 'bisnis_etam', 'investasi', 'gaya_hidup', 'lain_lain'];
-        
-        // Filter out transfer transactions
-        const nonTransferHistory = history.filter(item => item.expenseType !== 'transfer');
-        
         const values = expenseTypes.map(type => 
-            nonTransferHistory
+            filteredHistory
                 .filter(item => item.expenseType === type && item.amount < 0)
                 .reduce((sum, item) => sum + Math.abs(item.amount), 0)
         );
@@ -778,7 +835,7 @@
                 plugins: {
                     title: { 
                         display: true, 
-                        text: 'Distribusi Pengeluaran (Non-Transfer)', 
+                        text: `Distribusi Pengeluaran (Non-Transfer) ${startDateInput && endDateInput ? startDateInput + ' - ' + endDateInput : 'Semua Waktu'}`, 
                         font: { size: 18 } 
                     },
                     legend: { 
@@ -797,13 +854,38 @@
     }
 
     function evaluateTransfers() {
-        const transferHistory = history.filter(item => item.expenseType === 'transfer' && item.amount < 0);
+        const startDateInput = document.getElementById('startDate').value;
+        const endDateInput = document.getElementById('endDate').value;
+
+        function parseDate(dateStr) {
+            const parts = dateStr.split(' ');
+            if (parts.length !== 3) return null;
+            const monthNames = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
+            const day = parseInt(parts[0], 10);
+            const month = monthNames.indexOf(parts[1].toLowerCase());
+            const year = parseInt(parts[2], 10);
+            if (month === -1 || isNaN(day) || isNaN(year)) return null;
+            return new Date(year, month, day);
+        }
+
+        let transferHistory = history.filter(item => item.expenseType === 'transfer' && item.amount < 0);
+        if (startDateInput && endDateInput) {
+            const startDate = new Date(startDateInput + '-01');
+            const endDate = new Date(endDateInput + '-01');
+            endDate.setMonth(endDate.getMonth() + 1);
+            endDate.setDate(endDate.getDate() - 1);
+
+            transferHistory = transferHistory.filter(item => {
+                const itemDate = parseDate(item.date);
+                return itemDate >= startDate && itemDate <= endDate && !isNaN(itemDate.getTime());
+            });
+        }
+
         const totalTransfers = transferHistory.reduce((sum, item) => sum + Math.abs(item.amount), 0);
         
         let analysis = `<h3>Analisis Transfer</h3>`;
         analysis += `<p><strong>Total Transfer:</strong> Rp${totalTransfers.toLocaleString()}</p>`;
         
-        // Group by from/to accounts
         const transferMap = {};
         transferHistory.forEach(item => {
             const key = `${item.category} → ${item.title.split(' ke ')[1]}`;
@@ -898,16 +980,63 @@
         refreshAll();
     }
 
-    async function deleteTransaction(index) {
+    async function deleteTransaction(filteredIndex) {
         await loadData();
-        const transaksi = jsonData.transaksi[index];
-        
-        if (transaksi.expenseType === "transfer") {
-            jsonData.transaksi.splice(index, 1);
-            const matchingIndex = jsonData.transaksi.findIndex(t => 
-                t.title === transaksi.title && 
-                t.amount === -transaksi.amount && 
-                t.expenseType === "transfer"
+        const filter = document.getElementById('historyFilter').value;
+        const startDateInput = document.getElementById('startDate').value;
+        const endDateInput = document.getElementById('endDate').value;
+
+        function parseDate(dateStr) {
+            const parts = dateStr.split(' ');
+            if (parts.length !== 3) return null;
+            const monthNames = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
+            const day = parseInt(parts[0], 10);
+            const month = monthNames.indexOf(parts[1].toLowerCase());
+            const year = parseInt(parts[2], 10);
+            if (month === -1 || isNaN(day) || isNaN(year)) return null;
+            return new Date(year, month, day);
+        }
+
+        let filteredHistory = history.filter(item => {
+            const matchesCategory = filter === 'all' ||
+                (filter === 'Tunai' && item.categoryType === 'Tunai') ||
+                (filter === 'Bank 1' && item.category === 'Bank 1') ||
+                (filter === 'Bank 2' && item.category === 'Bank 2') ||
+                item.expenseType === filter;
+            return matchesCategory;
+        });
+
+        if (startDateInput && endDateInput) {
+            const startDate = new Date(startDateInput + '-01');
+            const endDate = new Date(endDateInput + '-01');
+            endDate.setMonth(endDate.getMonth() + 1);
+            endDate.setDate(endDate.getDate() - 1);
+
+            filteredHistory = filteredHistory.filter(item => {
+                const itemDate = parseDate(item.date);
+                return itemDate >= startDate && itemDate <= endDate && !isNaN(itemDate.getTime());
+            });
+        }
+
+        const transaksi = filteredHistory[filteredIndex];
+        if (!transaksi) return showToast('Transaksi tidak ditemukan');
+
+        const originalIndex = history.findIndex(item =>
+            item.title === transaksi.title &&
+            item.amount === transaksi.amount &&
+            item.date === transaksi.date &&
+            item.category === transaksi.category &&
+            item.expenseType === transaksi.expenseType
+        );
+
+        if (originalIndex === -1) return showToast('Transaksi tidak ditemukan di riwayat asli');
+
+        if (transaksi.expenseType === 'transfer') {
+            jsonData.transaksi.splice(originalIndex, 1);
+            const matchingIndex = jsonData.transaksi.findIndex(t =>
+                t.title === transaksi.title &&
+                t.amount === -transaksi.amount &&
+                t.expenseType === 'transfer'
             );
             if (matchingIndex !== -1) jsonData.transaksi.splice(matchingIndex, 1);
         } else {
@@ -917,9 +1046,9 @@
                     delete data[transaksi.categoryType][transaksi.category];
                 }
             }
-            jsonData.transaksi.splice(index, 1);
+            jsonData.transaksi.splice(originalIndex, 1);
         }
-        
+
         jsonData.assets = data;
         await saveData();
         showToast(`Transaksi "${transaksi.title}" dihapus`);
@@ -954,9 +1083,43 @@
 
     async function checkAssetLimit() {
         await loadData();
+        const startDateInput = document.getElementById('startDate').value;
+        const endDateInput = document.getElementById('endDate').value;
+
+        function parseDate(dateStr) {
+            const parts = dateStr.split(' ');
+            if (parts.length !== 3) return null;
+            const monthNames = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
+            const day = parseInt(parts[0], 10);
+            const month = monthNames.indexOf(parts[1].toLowerCase());
+            const year = parseInt(parts[2], 10);
+            if (month === -1 || isNaN(day) || isNaN(year)) return null;
+            return new Date(year, month, day);
+        }
+
+        let filteredExpenses = jsonData.transaksi.filter(item => item.amount < 0);
+        let filteredLifestyleExpenses = jsonData.transaksi.filter(item => item.expenseType === 'gaya_hidup' && item.amount < 0);
+
+        if (startDateInput && endDateInput) {
+            const startDate = new Date(startDateInput + '-01');
+            const endDate = new Date(endDateInput + '-01');
+            endDate.setMonth(endDate.getMonth() + 1);
+            endDate.setDate(endDate.getDate() - 1);
+
+            filteredExpenses = filteredExpenses.filter(item => {
+                const itemDate = parseDate(item.date);
+                return itemDate >= startDate && itemDate <= endDate && !isNaN(itemDate.getTime());
+            });
+
+            filteredLifestyleExpenses = filteredLifestyleExpenses.filter(item => {
+                const itemDate = parseDate(item.date);
+                return itemDate >= startDate && itemDate <= endDate && !isNaN(itemDate.getTime());
+            });
+        }
+
         const totalAssets = Object.values(data).reduce((sum, cat) => sum + Object.values(cat).reduce((sum, val) => sum + (parseFloat(val) || 0), 0), 0);
-        const totalExpenses = jsonData.transaksi.filter(item => item.amount < 0).reduce((sum, item) => sum + Math.abs(item.amount), 0);
-        const lifestyleExpenses = jsonData.transaksi.filter(item => item.expenseType === 'gaya_hidup' && item.amount < 0).reduce((sum, item) => sum + Math.abs(item.amount), 0);
+        const totalExpenses = filteredExpenses.reduce((sum, item) => sum + Math.abs(item.amount), 0);
+        const lifestyleExpenses = filteredLifestyleExpenses.reduce((sum, item) => sum + Math.abs(item.amount), 0);
         const monthlyIncome = 4700000;
 
         let warnings = [];
@@ -969,10 +1132,33 @@
 
     function evaluateExpenses() {
         const monthlyIncome = 4700000;
-        
-        // Filter out transfer transactions
-        const nonTransferHistory = history.filter(item => item.expenseType !== 'transfer');
-        
+        const startDateInput = document.getElementById('startDate').value;
+        const endDateInput = document.getElementById('endDate').value;
+
+        function parseDate(dateStr) {
+            const parts = dateStr.split(' ');
+            if (parts.length !== 3) return null;
+            const monthNames = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
+            const day = parseInt(parts[0], 10);
+            const month = monthNames.indexOf(parts[1].toLowerCase());
+            const year = parseInt(parts[2], 10);
+            if (month === -1 || isNaN(day) || isNaN(year)) return null;
+            return new Date(year, month, day);
+        }
+
+        let nonTransferHistory = history.filter(item => item.expenseType !== 'transfer');
+        if (startDateInput && endDateInput) {
+            const startDate = new Date(startDateInput + '-01');
+            const endDate = new Date(endDateInput + '-01');
+            endDate.setMonth(endDate.getMonth() + 1);
+            endDate.setDate(endDate.getDate() - 1);
+
+            nonTransferHistory = nonTransferHistory.filter(item => {
+                const itemDate = parseDate(item.date);
+                return itemDate >= startDate && itemDate <= endDate && !isNaN(itemDate.getTime());
+            });
+        }
+
         const totalExpenses = nonTransferHistory
             .filter(item => item.amount < 0)
             .reduce((sum, item) => sum + Math.abs(item.amount), 0);
@@ -994,7 +1180,7 @@
             'lain_lain': 5
         };
         
-        let analysis = `<h3>Analisis Pengeluaran (Non-Transfer)</h3><p><strong>Total:</strong> Rp${totalExpenses.toLocaleString()}</p><ul>`;
+        let analysis = `<h3>Analisis Pengeluaran (Non-Transfer) ${startDateInput && endDateInput ? startDateInput + ' - ' + endDateInput : 'Semua Waktu'}</h3><p><strong>Total:</strong> Rp${totalExpenses.toLocaleString()}</p><ul>`;
         expenseTypes.forEach(type => {
             const percentage = totalExpenses ? (expenseByType[type] / totalExpenses * 100).toFixed(1) : 0;
             const ideal = idealPercentages[type] || 0;
@@ -1029,7 +1215,6 @@
         analysis += totalExpenses > monthlyIncome ? `<li>Pengeluaran melebihi pendapatan!</li>` : `<li>Pengeluaran terkendali.</li>`;
         analysis += `</ul>`;
 
-        // Add transfer analysis
         analysis += evaluateTransfers();
 
         expenseEvaluationDiv.innerHTML = analysis;
@@ -1037,14 +1222,42 @@
 
     function filterHistory() {
         const filter = document.getElementById('historyFilter').value;
+        const startDateInput = document.getElementById('startDate').value;
+        const endDateInput = document.getElementById('endDate').value;
+
         historyList.innerHTML = '';
-        const filteredHistory = history.filter(item => {
-            if (filter === 'all') return true;
-            if (filter === 'Tunai') return item.categoryType === 'Tunai';
-            if (filter === 'Bank 1') return item.category === 'Bank 1';
-            if (filter === 'Bank 2') return item.category === 'Bank 2';
-            return item.expenseType === filter;
+
+        function parseDate(dateStr) {
+            const parts = dateStr.split(' ');
+            if (parts.length !== 3) return null;
+            const monthNames = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
+            const day = parseInt(parts[0], 10);
+            const month = monthNames.indexOf(parts[1].toLowerCase());
+            const year = parseInt(parts[2], 10);
+            if (month === -1 || isNaN(day) || isNaN(year)) return null;
+            return new Date(year, month, day);
+        }
+
+        let filteredHistory = history.filter(item => {
+            const matchesCategory = filter === 'all' ||
+                (filter === 'Tunai' && item.categoryType === 'Tunai') ||
+                (filter === 'Bank 1' && item.category === 'Bank 1') ||
+                (filter === 'Bank 2' && item.category === 'Bank 2') ||
+                item.expenseType === filter;
+            return matchesCategory;
         });
+
+        if (startDateInput && endDateInput) {
+            const startDate = new Date(startDateInput + '-01');
+            const endDate = new Date(endDateInput + '-01');
+            endDate.setMonth(endDate.getMonth() + 1);
+            endDate.setDate(endDate.getDate() - 1);
+
+            filteredHistory = filteredHistory.filter(item => {
+                const itemDate = parseDate(item.date);
+                return itemDate >= startDate && itemDate <= endDate && !isNaN(itemDate.getTime());
+            });
+        }
 
         filteredHistory.forEach((item, index) => {
             const evaluation = evaluateExpense(item);
@@ -1069,6 +1282,9 @@
             `;
             historyList.appendChild(li);
         });
+
+        createExpenseChart();
+        evaluateExpenses();
     }
 
     function refreshChart() {
