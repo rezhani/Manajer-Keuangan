@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajer Keuangan Pribadi</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            background-size: cover;
+            background-attachment: fixed;
+            font-size: 16px;
+            color: #333;
+            transition: background-color 0.3s;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            margin: 1em auto;
+            max-width: 95%;
+            padding: 1.5em;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+            margin-top: 0;
+            color: #2a5298;
+        }
+
+        .header {
+            padding: 1.5em;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 1.5em;
+        }
+
+        .header h1 {
+            color: #fff;
+            font-size: 2.5em;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(to right, #fff, #e0f7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5em;
+        }
+
+        .header p {
+            color: #e0f7ff;
+            font-size: 1.2em;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 50vh;
+            margin: 1em 0;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: 100%;
+            margin: 0 auto;
+            display: block;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 0.8em;
+            margin: 0.7em 0;
+            font-size: 1em;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-sizing: border-box;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.2);
+            outline: none;
+        }
+
+        button {
+            background: linear-gradient(to right, #2a5298, #1e3c72);
+            color: white;
+            border: none;
+            font-size: 1.1em;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .buttons-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.8em;
+            margin: 1em 0;
+        }
+
+        .section {
+            margin-bottom: 1.5em;
+            padding: 1.5em;
+            background: #f0f7ff;
+            border-radius: 12px;
+            border-left: 4px solid #2a5298;
+        }
+
+        .warning {
+            background: #ffcccc;
+            padding: 1em;
+            border-radius: 10px;
+            text-align: center;
+            margin: 1em 0;
+        }
+
+        .history-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5em;
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+            max-height: 700px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        li {
+            padding: 1em;
+            background: #f9f9f9;
+            border-radius: 8px;
+            margin-bottom: 0.8em;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .transaction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5em;
+        }
+
+        .transaction-title { font-weight: bold; font-size: 1.1em; }
+        .transaction-amount { font-weight: bold; font-size: 1.1em; }
+        .plus { color: #28a745; }
+        .minus { color: #dc3545; }
+
+        .transaction-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 0.5em;
+        }
+
+        .evaluation {
+            padding: 0.8em;
+            background: #e6f0ff;
+            border-radius: 8px;
+            margin-top: 0.5em;
+            font-size: 0.9em;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.5em 1em;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            align-self: flex-end;
+        }
+
+        .delete-btn:hover { background: #c82333; }
+
+        #toast {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 1em 2em;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 1000;
+            font-size: 1em;
+        }
+
+        .dark-mode {
+            background: #121212;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .container { background: rgba(30, 30, 40, 0.92); }
+        .dark-mode h1, .dark-mode h2, .dark-mode h3 { color: #8ab4f8; }
+        .dark-mode input, .dark-mode select { background: #2d2d3a; color: #e0e0e0; border-color: #444; }
+        .dark-mode button { background: linear-gradient(to right, #3a5a9a, #2a3f6f); }
+        .dark-mode button:hover { background: linear-gradient(to right, #2a5298, #1e3c72); }
+        .dark-mode .warning { background: #663333; color: #fff; }
+        .dark-mode li { background: #252531; }
+        .dark-mode .evaluation { background: rgba(42, 82, 152, 0.2); }
+        .dark-mode .transaction-details { color: #aaa; }
+        .dark-mode .section { background: rgba(30, 40, 60, 0.6); border-left: 4px solid #8ab4f8; }
+
+        .transfer-section {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 1em;
+            margin: 1em 0;
+        }
+
+        .debt-section {
+            display: none;
+            margin: 1em 0;
+        }
+
+        .scrollable-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .scrollable-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scrollable-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .scrollable-list::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .scrollable-list::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .dark-mode .scrollable-list {
+            border-color: #444;
+        }
+
+        .dark-mode .scrollable-list::-webkit-scrollbar-track {
+            background: #2d2d3a;
+        }
+
+        .dark-mode .scrollable-list::-webkit-scrollbar-thumb {
+            background: #555;
+        }
+
+        .dark-mode .scrollable-list::-webkit-scrollbar-thumb:hover {
+            background: #777;
+        }
+
+        @media (min-width: 768px) {
+            .container { max-width: 1000px; }
+            .history-grid { grid-template-columns: 1fr 1fr; }
+            .crud-sections { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1em; }
+			.scrollable-list { max-height: 800px;
+			}
+		}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Manajer Keuangan Pribadi</h1>
+        <p>Kelola aset dan laporan keuangan Anda secara terintegrasi</p>
+    </div>
+
+    <div id="toast"></div>
+
+    <div class="container">
+        <div class="buttons-container">
+            <button onclick="toggleTheme()">🔁 Toggle Tema Gelap</button>
+            <button onclick="backupData()">💾 Backup Data (JSON)</button>
+            <input type="file" id="restoreFile" accept=".json">
+            <button onclick="restoreData()">🔄 Perbarui Data</button>
+        </div>
+
+        <div id="warning" class="warning" style="display: none;"></div>
+
+        <!-- Aset Section -->
+        <div class="section">
+            <h2>Manajemen Aset</h2>
+            <div class="buttons-container">
+                <button id="chartToggle" onclick="toggleChart()">📊 Tampilkan Heatmap Antar-Kategori</button>
+                <button id="switchCategoryBtn" onclick="switchCategory()">🔄 Ganti Kategori</button>
+                <button id="legendToggleBtn" onclick="toggleLegend()">👁️ Tampilkan/Sembunyikan Legenda</button>
+            </div>
+            <div class="chart-container">
+                <canvas id="pieChart"></canvas>
+                <canvas id="heatmapChart" style="display: none;"></canvas>
+            </div>
+            <div id="totalValue" class="warning"></div>
+
+            <div class="crud-sections">
+                <div class="section">
+                    <h3>➕ Tambah Item</h3>
+                    <input type="text" id="itemName" placeholder="Nama item">
+                    <input type="number" id="itemValue" placeholder="Nilai (Rp)" min="0" max="100000000">
+                    <select id="itemCategory">
+                        <option value="Investasi">Investasi</option>
+                        <option value="Aset Konsumtif">Aset Konsumtif</option>
+                        <option value="Tunai">Tunai</option>
+                    </select>
+                    <button onclick="addItem()">Tambah Item</button>
+                </div>
+                <div class="section">
+                    <h3>✏️ Edit Item</h3>
+                    <select id="editItemSelect" onchange="fillEditValue()"></select>
+                    <input type="number" id="editItemValue" placeholder="Harga baru" min="0" max="100000000">
+                    <button onclick="updateItem()">Update Nilai</button>
+                </div>
+                <div class="section">
+                    <h3>🗑️ Hapus Item</h3>
+                    <select id="deleteItemSelect"></select>
+                    <button onclick="deleteItem()">Hapus Item</button>
+                </div>
+            </div>
+            <div id="assetEvaluation" class="section"></div>
+        </div>
+
+        <!-- Keuangan Section -->
+        <div class="section">
+            <h2>Laporan Keuangan</h2>
+            <div class="history-grid">
+                <div>
+                    <h3>➕ Input Transaksi</h3>
+                    <form id="expenseForm">
+                        <input type="text" id="title" required placeholder="Nama Aktivitas">
+                        <input type="number" id="amount" required placeholder="Jumlah (Rp)" min="1" max="100000000">
+                        <select id="transactionType" onchange="toggleSpecialSections()" required>
+                            <option value="normal">Transaksi Normal</option>
+                            <option value="transfer">Transfer Antar Akun</option>
+                        </select>
+                        
+                        <!-- Transfer Section -->
+                        <div class="transfer-section" id="transferSection">
+                            <div>
+                                <label>Dari:</label>
+                                <select id="fromAccount">
+                                    <option value="Tunai|Bank 1">Bank 1</option>
+                                    <option value="Tunai|Bank 2">Bank 2</option>
+                                    <option value="Tunai|Uang Tunai">Uang Tunai</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Ke:</label>
+                                <select id="toAccount">
+                                    <option value="Tunai|Bank 1">Bank 1</option>
+                                    <option value="Tunai|Bank 2">Bank 2</option>
+                                    <option value="Tunai|Uang Tunai">Uang Tunai</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <select id="category" required>
+                            <option value="Tunai|Bank 1">Bank 1</option>
+                            <option value="Tunai|Bank 2">Bank 2</option>
+                            <option value="Tunai|Uang Tunai">Uang Tunai</option>
+                        </select>
+                        <select id="expenseType" required>
+                            <option value="kebutuhan_dasar">Kebutuhan Dasar</option>
+                            <option value="bisnis_etam">Bisnis / Usaha</option>
+                            <option value="investasi">Investasi/Tabungan</option>
+                            <option value="gaya_hidup">Gaya Hidup</option>
+                            <option value="lain_lain">Lain-lain</option>
+                        </select>
+                        <select id="type" required>
+                            <option value="-">Pengeluaran (-)</option>
+                            <option value="+">Pemasukan (+)</option>
+                        </select>
+                        <button type="submit">💾 Simpan Transaksi</button>
+                    </form>
+
+                    <h3>📜 Riwayat Transaksi</h3>
+                    <select id="historyFilter" onchange="filterHistory()">
+                        <option value="all">Semua Transaksi</option>
+                        <option value="Tunai">Tunai</option>
+                        <option value="Bank 1">Bank 1</option>
+                        <option value="Bank 2">Bank 2</option>
+                        <option value="kebutuhan_dasar">Kebutuhan Dasar</option>
+                        <option value="bisnis_etam">Bisnis / Usaha</option>
+                        <option value="investasi">Investasi/Tabungan</option>
+                        <option value="gaya_hidup">Gaya Hidup</option>
+                        <option value="lain_lain">Lain-lain</option>
+                    </select>
+                    <div class="scrollable-list">
+                        <ul id="historyList"></ul>
+                    </div>
+                </div>
+                <div>
+                    <div class="chart-container">
+                        <canvas id="expenseChart"></canvas>
+                    </div>
+                    <div id="expenseEvaluation" class="section"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const jsonData = {
+        assets: {},
+        transaksi: []
+    };
+
+    let data = jsonData.assets;
+    let history = jsonData.transaksi;
+    let categories = Object.keys(data).concat("Semua Aset");
+    let current = 0;
+    let showLegend = true;
+    let chartMode = 'pie';
+    let pieChart, heatmapChart, expenseChart;
+
+    const pieChartCanvas = document.getElementById("pieChart").getContext("2d");
+    const heatmapChartCanvas = document.getElementById("heatmapChart").getContext("2d");
+    const expenseChartCanvas = document.getElementById("expenseChart").getContext("2d");
+    const totalValueDiv = document.getElementById("totalValue");
+    const assetEvaluationDiv = document.getElementById("assetEvaluation");
+    const expenseEvaluationDiv = document.getElementById("expenseEvaluation");
+    const historyList = document.getElementById("historyList");
+    const warningDiv = document.getElementById("warning");
+    const form = document.getElementById("expenseForm");
+    const transferSection = document.getElementById("transferSection");
+
+    function toggleSpecialSections() {
+        const type = document.getElementById("transactionType").value;
+        transferSection.style.display = type === "transfer" ? "grid" : "none";
+    }
+
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.style.display = 'block';
+        setTimeout(() => toast.style.display = 'none', 3000);
+    }
+
+    function encryptData(data) {
+        return btoa(JSON.stringify(data));
+    }
+
+    function decryptData(data) {
+        try {
+            return JSON.parse(atob(data));
+        } catch {
+            return jsonData;
+        }
+    }
+
+    function capitalizeWords(str) {
+        return str.replace(/\b\w/g, char => char.toUpperCase());
+    }
+
+    function loadData() {
+        const storedData = localStorage.getItem('data');
+        if (storedData) {
+            Object.assign(jsonData, decryptData(storedData));
+            data = jsonData.assets;
+            history = jsonData.transaksi;
+            categories = Object.keys(data).concat("Semua Aset");
+        }
+        localStorage.setItem('data', encryptData(jsonData));
+        return Promise.resolve();
+    }
+
+    function saveData() {
+        localStorage.setItem('data', encryptData(jsonData));
+        return Promise.resolve();
+    }
+
+    function backupData() {
+        const dataStr = JSON.stringify(jsonData);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'keuangan_backup.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Data berhasil dibackup!');
+    }
+
+    function restoreData() {
+        const file = document.getElementById('restoreFile').files[0];
+        if (!file) return showToast('Pilih file JSON terlebih dahulu');
+        const reader = new FileReader();
+        reader.onload = e => {
+            try {
+                Object.assign(jsonData, JSON.parse(e.target.result));
+                data = jsonData.assets;
+                history = jsonData.transaksi;
+                categories = Object.keys(data).concat("Semua Aset");
+                saveData().then(() => {
+                    refreshAll();
+                    showToast('Data berhasil direstore!');
+                    location.reload();
+                });
+            } catch {
+                showToast('File JSON tidak valid');
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    }
+
+    // Aset Functions
+    function createPieChartData(category) {
+        let mergedData = category === "Semua Aset" ? Object.assign({}, ...Object.values(data)) : data[category];
+        let sorted = Object.entries(mergedData).sort((a, b) => b[1] - a[1]);
+        
+        let displayItems = sorted.slice(0, 10);
+        const otherItems = sorted.slice(10);
+        
+        if (otherItems.length > 0) {
+            const otherTotal = otherItems.reduce((sum, item) => sum + item[1], 0);
+            displayItems.push(["Lain-lain", otherTotal]);
+        }
+        
+        const labels = displayItems.map(e => e[0]);
+        const values = displayItems.map(e => e[1]);
+        const total = sorted.reduce((sum, item) => sum + item[1], 0);
+        
+        totalValueDiv.textContent = `Total ${category}: Rp${total.toLocaleString()}`;
+
+        return {
+            type: 'pie',
+            data: {
+                labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796', '#5a5c69', '#3a3b45', '#2e59d9', '#17a673', '#6c757d']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: { 
+                        display: true, 
+                        text: `Kategori: ${category}`, 
+                        font: { size: 18 } 
+                    },
+                    legend: { 
+                        display: showLegend, 
+                        position: 'bottom', 
+                        labels: { 
+                            font: { size: 12 }, 
+                            generateLabels: chart => chart.data.labels.map((label, i) => ({ 
+                                text: `${label} (Rp${chart.data.datasets[0].data[i].toLocaleString()})`, 
+                                fillStyle: chart.data.datasets[0].backgroundColor[i], 
+                                index: i 
+                            })) 
+                        } 
+                    },
+                    datalabels: { 
+                        color: '#000', 
+                        font: { weight: 'bold', size: 12 }, 
+                        formatter: (v, ctx) => {
+                            const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            return (v / total * 100).toFixed(1) + '%';
+                        } 
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        };
+    }
+
+    function createHeatmapData(category) {
+        let labels, values;
+        if (category === "Semua Aset") {
+            labels = Object.keys(data).filter(cat => cat !== "Semua Aset");
+            values = labels.map(cat => Object.values(data[cat]).reduce((sum, val) => sum + (parseFloat(val) || 0), 0));
+        } else {
+            const mergedData = data[category] || {};
+            let sorted = Object.entries(mergedData).sort((a, b) => b[1] - a[1]);
+            labels = sorted.map(e => e[0]);
+            values = sorted.map(e => e[1]);
+            totalValueDiv.textContent = `Total ${category}: Rp${values.reduce((a, b) => a + b, 0).toLocaleString()}`;
+        }
+
+        const maxValue = Math.max(...values, 1);
+        const colors = values.map(val => `rgb(${Math.floor(200 * (1 - val / maxValue))}, ${Math.floor(200 * val / maxValue)}, 0)`);
+
+        return {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                    label: category === "Semua Aset" ? 'Total Nilai Kategori (Rp)' : `Nilai Item dalam ${category} (Rp)`,
+                    data: values,
+                    backgroundColor: colors,
+                    borderColor: colors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, ticks: { callback: value => 'Rp' + value.toLocaleString(), font: { size: 12 } } }, x: { ticks: { font: { size: 12 } } } },
+                plugins: { title: { display: true, text: category === "Semua Aset" ? 'Heatmap Total Nilai Kategori' : `Heatmap Item dalam ${category}`, font: { size: 18 } }, legend: { display: false }, datalabels: { anchor: 'end', align: 'top', formatter: value => 'Rp' + value.toLocaleString(), color: '#000', font: { weight: 'bold', size: 12 } } }
+            },
+            plugins: [ChartDataLabels]
+        };
+    }
+
+    async function addItem() {
+        const name = capitalizeWords(document.getElementById('itemName').value.trim());
+        const value = parseInt(document.getElementById('itemValue').value);
+        const category = document.getElementById('itemCategory').value;
+
+        if (!name || isNaN(value) || value < 0) return showToast("Isi semua field dengan nilai valid");
+
+        await loadData();
+        if (!data[category]) data[category] = {};
+        data[category][name] = value;
+        jsonData.assets = data;
+        await saveData();
+        showToast(`"${name}" ditambahkan ke "${category}"`);
+        refreshAll();
+        document.getElementById('itemName').value = '';
+        document.getElementById('itemValue').value = '';
+    }
+
+    async function updateItem() {
+        const sel = document.getElementById('editItemSelect');
+        const [name, cat] = sel.value.split('|||');
+        const value = parseInt(document.getElementById('editItemValue').value);
+
+        if (isNaN(value) || value < 0) return showToast("Masukkan nilai valid");
+
+        await loadData();
+        data[cat][name] = value;
+        jsonData.assets = data;
+        await saveData();
+        showToast(`"${name}" diupdate ke Rp${value.toLocaleString()}`);
+        refreshAll();
+    }
+
+    async function deleteItem() {
+        const sel = document.getElementById('deleteItemSelect');
+        const [name, cat] = sel.value.split('|||');
+
+        await loadData();
+        delete data[cat][name];
+        if (Object.keys(data[cat]).length === 0) delete data[cat];
+        jsonData.assets = data;
+        categories = Object.keys(data).concat("Semua Aset");
+        await saveData();
+        showToast(`"${name}" dihapus dari "${cat}"`);
+        refreshAll();
+    }
+
+    function evaluateAssets() {
+        const monthlyIncome = 4700000;
+        const totalAssets = Object.values(data).reduce((sum, cat) => sum + Object.values(cat).reduce((sum, val) => sum + (parseFloat(val) || 0), 0), 0);
+        const categoryTotals = {};
+        const categoryPercentages = {};
+        for (let cat of categories) {
+            if (cat === "Semua Aset") continue;
+            const total = Object.values(data[cat]).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
+            categoryTotals[cat] = total;
+            categoryPercentages[cat] = totalAssets ? ((total / totalAssets) * 100).toFixed(1) : 0;
+        }
+
+        const emergencyFundTarget = monthlyIncome * 6;
+        const investmentTarget = totalAssets * 0.3;
+        const consumptiveTarget = totalAssets * 0.3;
+
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const monthlyLifestyleExpenses = jsonData.transaksi
+            .filter(item => {
+                const parts = item.date.split(' ');
+                if (parts.length !== 3) return false;
+                const monthNames = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
+                const month = monthNames.indexOf(parts[1].toLowerCase());
+                if (month === -1) return false;
+                const itemDate = new Date(`${parts[2]}-${month + 1}-${parts[0]}`);
+                return item.expenseType === 'gaya_hidup' && item.amount < 0 && itemDate >= thirtyDaysAgo && !isNaN(itemDate.getTime());
+            })
+            .reduce((sum, item) => sum + Math.abs(item.amount), 0);
+
+        let evaluation = `<h3>Penilaian Aset</h3><p><strong>Total Aset:</strong> Rp${totalAssets.toLocaleString()}</p><ul>`;
+        for (let cat of categories) {
+            if (cat === "Semua Aset") continue;
+            evaluation += `<li>${cat}: Rp${categoryTotals[cat].toLocaleString()} (${categoryPercentages[cat]}%)</li>`;
+        }
+        evaluation += `</ul><p><strong>Analisis:</strong></p><ul>`;
+
+        const cashBalance = categoryTotals['Tunai'] || 0;
+        evaluation += `<li><strong>Tunai:</strong> Rp${cashBalance.toLocaleString()} - ${cashBalance < emergencyFundTarget ? `Kurang; target Rp${emergencyFundTarget.toLocaleString()}` : 'Cukup'}</li>`;
+
+        const investmentBalance = categoryTotals['Investasi'] || 0;
+        evaluation += `<li><strong>Investasi:</strong> Rp${investmentBalance.toLocaleString()} - ${investmentBalance < investmentTarget ? `Kurang; target Rp${investmentTarget.toLocaleString()}` : 'Optimal'}</li>`;
+
+        const consumptiveBalance = categoryTotals['Aset Konsumtif'] || 0;
+        evaluation += `<li><strong>Aset Konsumtif:</strong> Rp${consumptiveBalance.toLocaleString()} - ${consumptiveBalance > consumptiveTarget ? `Terlalu besar; batasi Rp${consumptiveTarget.toLocaleString()}` : 'Sesuai'}</li>`;
+
+        const lifestyleTarget = monthlyIncome * 0.3;
+        evaluation += `<li><strong>Gaya Hidup (30 hari):</strong> Rp${monthlyLifestyleExpenses.toLocaleString()} - ${monthlyLifestyleExpenses > lifestyleTarget ? `Melebihi Rp${lifestyleTarget.toLocaleString()}` : 'Terkendali'}</li></ul>`;
+
+        evaluation += `<p><strong>Saran:</strong></p><ul>`;
+        if (cashBalance < emergencyFundTarget) evaluation += `<li>Tambah Rp${Math.min(monthlyIncome * 0.2, emergencyFundTarget - cashBalance).toLocaleString()}/bulan ke tunai.</li>`;
+        if (investmentBalance < investmentTarget) evaluation += `<li>Alokasikan Rp${Math.min(monthlyIncome * 0.2, investmentTarget - investmentBalance).toLocaleString()}/bulan ke investasi.</li>`;
+        if (consumptiveBalance > consumptiveTarget) {
+            const items = Object.entries(data['Aset Konsumtif'] || {}).sort((a, b) => b[1] - a[1]).filter(([_, v]) => v <= totalAssets * 0.05).slice(0, 3).map(([n]) => n);
+            evaluation += `<li>Kurangi aset konsumtif: ${items.length ? `jual ${items.join(', ')}` : 'batasi pembelian baru'}.</li>`;
+        }
+        if (monthlyLifestyleExpenses > lifestyleTarget) evaluation += `<li>Batasi gaya hidup <Rp${lifestyleTarget.toLocaleString()}/bulan.</li>`;
+        evaluation += `<li>Alokasi ideal: 50% kebutuhan (Rp${(monthlyIncome * 0.5).toLocaleString()}), 30% gaya hidup (Rp${lifestyleTarget.toLocaleString()}), 20% tabungan (Rp${(monthlyIncome * 0.2).toLocaleString()}).</li></ul>`;
+
+        assetEvaluationDiv.innerHTML = evaluation;
+    }
+
+    // Keuangan Functions
+    function createExpenseChart() {
+        const expenseTypes = ['kebutuhan_dasar', 'bisnis_etam', 'investasi', 'gaya_hidup', 'lain_lain'];
+        
+        // Filter out transfer transactions
+        const nonTransferHistory = history.filter(item => item.expenseType !== 'transfer');
+        
+        const values = expenseTypes.map(type => 
+            nonTransferHistory
+                .filter(item => item.expenseType === type && item.amount < 0)
+                .reduce((sum, item) => sum + Math.abs(item.amount), 0)
+        );
+
+        if (expenseChart) expenseChart.destroy();
+        expenseChart = new Chart(expenseChartCanvas, {
+            type: 'pie',
+            data: {
+                labels: expenseTypes.map(type => ({
+                    'kebutuhan_dasar': 'Kebutuhan Dasar',
+                    'bisnis_etam': 'Bisnis / Usaha',
+                    'investasi': 'Investasi/Tabungan',
+                    'gaya_hidup': 'Gaya Hidup',
+                    'lain_lain': 'Lain-lain'
+                }[type] || type)),
+                datasets: [{ 
+                    data: values, 
+                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'] 
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: { 
+                        display: true, 
+                        text: 'Distribusi Pengeluaran (Non-Transfer)', 
+                        font: { size: 18 } 
+                    },
+                    legend: { 
+                        position: 'bottom', 
+                        labels: { font: { size: 12 } } 
+                    },
+                    datalabels: { 
+                        color: '#000', 
+                        font: { weight: 'bold', size: 12 }, 
+                        formatter: (v, ctx) => v ? `Rp${v.toLocaleString()}\n${(v / ctx.dataset.data.reduce((a, b) => a + b, 0) * 100).toFixed(1)}%` : '0%' 
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+    }
+
+    function evaluateTransfers() {
+        const transferHistory = history.filter(item => item.expenseType === 'transfer' && item.amount < 0);
+        const totalTransfers = transferHistory.reduce((sum, item) => sum + Math.abs(item.amount), 0);
+        
+        let analysis = `<h3>Analisis Transfer</h3>`;
+        analysis += `<p><strong>Total Transfer:</strong> Rp${totalTransfers.toLocaleString()}</p>`;
+        
+        // Group by from/to accounts
+        const transferMap = {};
+        transferHistory.forEach(item => {
+            const key = `${item.category} → ${item.title.split(' ke ')[1]}`;
+            transferMap[key] = (transferMap[key] || 0) + Math.abs(item.amount);
+        });
+        
+        analysis += `<ul>`;
+        for (const [transfer, amount] of Object.entries(transferMap)) {
+            analysis += `<li>${transfer}: Rp${amount.toLocaleString()}</li>`;
+        }
+        analysis += `</ul>`;
+        
+        return analysis;
+    }
+
+    async function addTransaction() {
+        const transactionType = document.getElementById('transactionType').value;
+        const title = capitalizeWords(document.getElementById('title').value.trim());
+        const amount = parseInt(document.getElementById('amount').value);
+        const type = document.getElementById('type').value;
+        const date = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+
+        if (!title || isNaN(amount) || amount <= 0) return showToast("Isi semua field dengan nilai valid");
+
+        await loadData();
+        let transaksi = { title, amount: type === '-' ? -amount : amount, date };
+        
+        if (transactionType === "transfer") {
+            const fromAccount = document.getElementById('fromAccount').value;
+            const toAccount = document.getElementById('toAccount').value;
+            
+            const [fromType, fromCat] = fromAccount.split('|');
+            const [toType, toCat] = toAccount.split('|');
+            
+            transaksi = {
+                title: `Transfer dari ${fromCat} ke ${toCat}`,
+                amount: -amount,
+                category: fromCat,
+                categoryType: fromType,
+                expenseType: "transfer",
+                date
+            };
+            
+            jsonData.transaksi.unshift(transaksi);
+            
+            const transferTo = {
+                title: `Transfer dari ${fromCat} ke ${toCat}`,
+                amount: amount,
+                category: toCat,
+                categoryType: toType,
+                expenseType: "transfer",
+                date
+            };
+            
+            jsonData.transaksi.unshift(transferTo);
+            
+            if (!data[fromType]) data[fromType] = {};
+            if (!data[fromType][fromCat]) data[fromType][fromCat] = 0;
+            data[fromType][fromCat] -= amount;
+            
+            if (!data[toType]) data[toType] = {};
+            if (!data[toType][toCat]) data[toType][toCat] = 0;
+            data[toType][toCat] += amount;
+            
+        } else {
+            const [categoryType, category] = document.getElementById('category').value.split('|');
+            const expenseType = document.getElementById('expenseType').value;
+            
+            transaksi = { 
+                title, 
+                amount: type === '-' ? -amount : amount, 
+                category, 
+                categoryType, 
+                expenseType, 
+                date 
+            };
+            
+            if (!data[categoryType]) data[categoryType] = {};
+            if (!data[categoryType][category]) data[categoryType][category] = 0;
+            data[categoryType][category] += transaksi.amount;
+            
+            if (data[categoryType][category] < 0) showToast(`Saldo ${category} negatif: Rp${data[categoryType][category].toLocaleString()}`);
+            if (data[categoryType][category] === 0) delete data[categoryType][category];
+            
+            jsonData.transaksi.unshift(transaksi);
+        }
+
+        jsonData.assets = data;
+        await saveData();
+        showToast(`Transaksi "${title}" disimpan`);
+        form.reset();
+        refreshAll();
+    }
+
+    async function deleteTransaction(index) {
+        await loadData();
+        const transaksi = jsonData.transaksi[index];
+        
+        if (transaksi.expenseType === "transfer") {
+            jsonData.transaksi.splice(index, 1);
+            const matchingIndex = jsonData.transaksi.findIndex(t => 
+                t.title === transaksi.title && 
+                t.amount === -transaksi.amount && 
+                t.expenseType === "transfer"
+            );
+            if (matchingIndex !== -1) jsonData.transaksi.splice(matchingIndex, 1);
+        } else {
+            if (transaksi.categoryType && transaksi.category) {
+                data[transaksi.categoryType][transaksi.category] -= transaksi.amount;
+                if (data[transaksi.categoryType][transaksi.category] === 0) {
+                    delete data[transaksi.categoryType][transaksi.category];
+                }
+            }
+            jsonData.transaksi.splice(index, 1);
+        }
+        
+        jsonData.assets = data;
+        await saveData();
+        showToast(`Transaksi "${transaksi.title}" dihapus`);
+        refreshAll();
+    }
+
+    function evaluateExpense(item) {
+        let necessity = 3, efficiency = 3, goalAlignment = 3, frequency = 3;
+        if (item.amount < 0) {
+            switch (item.expenseType) {
+                case 'kebutuhan_dasar': necessity = 5; efficiency = 4; goalAlignment = 5; frequency = 4; break;
+                case 'bisnis_etam': necessity = 4; efficiency = 4; goalAlignment = 5; frequency = 3; break;
+                case 'investasi': necessity = 4; efficiency = 5; goalAlignment = 5; frequency = 2; break;
+                case 'gaya_hidup': necessity = 2; efficiency = 3; goalAlignment = 2; frequency = 3; break;
+                case 'lain_lain': necessity = 3; efficiency = 3; goalAlignment = 3; frequency = 3; break;
+                case 'transfer': necessity = 4; efficiency = 5; goalAlignment = 5; frequency = 3; break;
+            }
+            efficiency = Math.abs(item.amount) > 1000000 ? 2 : Math.abs(item.amount) > 500000 ? 3 : 4;
+        } else {
+            necessity = 5; efficiency = 5; goalAlignment = 5; frequency = 4;
+        }
+        const score = (necessity + efficiency + goalAlignment + frequency) / 4;
+        return { score: score.toFixed(2), necessity, efficiency, goalAlignment, frequency };
+    }
+
+    function getSuggestion(score) {
+        if (score >= 4.5) return "Sangat baik! Pertahankan.";
+        if (score >= 4) return "Baik, bisa lebih optimal.";
+        if (score >= 3) return "Cukup, pertimbangkan alternatif.";
+        return "Perlu evaluasi ulang.";
+    }
+
+    async function checkAssetLimit() {
+        await loadData();
+        const totalAssets = Object.values(data).reduce((sum, cat) => sum + Object.values(cat).reduce((sum, val) => sum + (parseFloat(val) || 0), 0), 0);
+        const totalExpenses = jsonData.transaksi.filter(item => item.amount < 0).reduce((sum, item) => sum + Math.abs(item.amount), 0);
+        const lifestyleExpenses = jsonData.transaksi.filter(item => item.expenseType === 'gaya_hidup' && item.amount < 0).reduce((sum, item) => sum + Math.abs(item.amount), 0);
+        const monthlyIncome = 4700000;
+
+        let warnings = [];
+        if (totalExpenses > totalAssets) warnings.push(`Pengeluaran (Rp${totalExpenses.toLocaleString()}) > aset (Rp${totalAssets.toLocaleString()})`);
+        if (lifestyleExpenses > monthlyIncome * 0.3) warnings.push(`Gaya hidup (Rp${lifestyleExpenses.toLocaleString()}) > 30% pendapatan (Rp${(monthlyIncome * 0.3).toLocaleString()})`);
+
+        warningDiv.innerHTML = warnings.length ? `<strong>Peringatan:</strong> ${warnings.join(' ')}` : '';
+        warningDiv.style.display = warnings.length ? 'block' : 'none';
+    }
+
+    function evaluateExpenses() {
+        const monthlyIncome = 4700000;
+        
+        // Filter out transfer transactions
+        const nonTransferHistory = history.filter(item => item.expenseType !== 'transfer');
+        
+        const totalExpenses = nonTransferHistory
+            .filter(item => item.amount < 0)
+            .reduce((sum, item) => sum + Math.abs(item.amount), 0);
+            
+        const expenseByType = {};
+        const expenseTypes = ['kebutuhan_dasar', 'bisnis_etam', 'investasi', 'gaya_hidup', 'lain_lain'];
+        
+        expenseTypes.forEach(type => 
+            expenseByType[type] = nonTransferHistory
+                .filter(item => item.expenseType === type && item.amount < 0)
+                .reduce((sum, item) => sum + Math.abs(item.amount), 0)
+        );
+
+        const idealPercentages = { 
+            'kebutuhan_dasar': 50, 
+            'bisnis_etam': 10, 
+            'investasi': 20, 
+            'gaya_hidup': 15, 
+            'lain_lain': 5
+        };
+        
+        let analysis = `<h3>Analisis Pengeluaran (Non-Transfer)</h3><p><strong>Total:</strong> Rp${totalExpenses.toLocaleString()}</p><ul>`;
+        expenseTypes.forEach(type => {
+            const percentage = totalExpenses ? (expenseByType[type] / totalExpenses * 100).toFixed(1) : 0;
+            const ideal = idealPercentages[type] || 0;
+            const typeName = {
+                'kebutuhan_dasar': 'Kebutuhan Dasar',
+                'bisnis_etam': 'Bisnis Etam',
+                'investasi': 'Investasi',
+                'gaya_hidup': 'Gaya Hidup',
+                'lain_lain': 'Lain-lain'
+            }[type] || type;
+            
+            analysis += `<li>${typeName}: Rp${expenseByType[type].toLocaleString()} (${percentage}%) - ${percentage > ideal ? 'melebihi' : 'di bawah'} ${ideal}%</li>`;
+        });
+        analysis += `</ul>`;
+
+        const needs = expenseByType['kebutuhan_dasar'] + (expenseByType['bisnis_etam'] * 0.5);
+        const wants = expenseByType['gaya_hidup'] + (expenseByType['bisnis_etam'] * 0.5);
+        const savings = expenseByType['investasi'];
+        const needsPercentage = totalExpenses ? (needs / totalExpenses * 100).toFixed(1) : 0;
+        const wantsPercentage = totalExpenses ? (wants / totalExpenses * 100).toFixed(1) : 0;
+        const savingsPercentage = totalExpenses ? (savings / totalExpenses * 100).toFixed(1) : 0;
+
+        analysis += `<h4>Metode 50:30:20</h4><ul>`;
+        analysis += `<li>Kebutuhan (50%): Rp${needs.toLocaleString()} (${needsPercentage}%) - ${needsPercentage > 50 ? 'Melebihi' : 'Di bawah'}</li>`;
+        analysis += `<li>Keinginan (30%): Rp${wants.toLocaleString()} (${wantsPercentage}%) - ${wantsPercentage > 30 ? 'Melebihi' : 'Di bawah'}</li>`;
+        analysis += `<li>Tabungan (20%): Rp${savings.toLocaleString()} (${savingsPercentage}%) - ${savingsPercentage > 20 ? 'Melebihi' : 'Di bawah'}</li></ul>`;
+
+        analysis += `<h4>Rekomendasi</h4><ul>`;
+        if (needsPercentage > 55) analysis += `<li>Kurangi pengeluaran kebutuhan dasar.</li>`;
+        if (wantsPercentage > 35) analysis += `<li>Kurangi pengeluaran gaya hidup.</li>`;
+        if (savingsPercentage < 15) analysis += `<li>Tingkatkan tabungan/investasi.</li>`;
+        analysis += totalExpenses > monthlyIncome ? `<li>Pengeluaran melebihi pendapatan!</li>` : `<li>Pengeluaran terkendali.</li>`;
+        analysis += `</ul>`;
+
+        // Add transfer analysis
+        analysis += evaluateTransfers();
+
+        expenseEvaluationDiv.innerHTML = analysis;
+    }
+
+    function filterHistory() {
+        const filter = document.getElementById('historyFilter').value;
+        historyList.innerHTML = '';
+        const filteredHistory = history.filter(item => {
+            if (filter === 'all') return true;
+            if (filter === 'Tunai') return item.categoryType === 'Tunai';
+            if (filter === 'Bank 1') return item.category === 'Bank 1';
+            if (filter === 'Bank 2') return item.category === 'Bank 2';
+            return item.expenseType === filter;
+        });
+
+        filteredHistory.forEach((item, index) => {
+            const evaluation = evaluateExpense(item);
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <div class="transaction-header">
+                    <div class="transaction-title">${item.title}</div>
+                    <div class="transaction-amount ${item.amount < 0 ? 'minus' : 'plus'}">${item.amount < 0 ? '-' : '+'}Rp${Math.abs(item.amount).toLocaleString()}</div>
+                </div>
+                <div class="transaction-details">
+                    <div>${item.date}</div>
+                    <div>${item.category} (${item.categoryType})</div>
+                    <div>${item.expenseType}</div>
+                </div>
+                <div class="evaluation">
+                    <strong>Penilaian:</strong> Skor ${evaluation.score}/5<br>
+                    <strong>Detail:</strong> Kepentingan ${evaluation.necessity}, Efisiensi ${evaluation.efficiency}, 
+                    Dampak ${evaluation.goalAlignment}, Frekuensi ${evaluation.frequency}<br>
+                    <strong>Saran:</strong> ${getSuggestion(evaluation.score)}
+                </div>
+                <button class="delete-btn" onclick="deleteTransaction(${index})">Hapus</button>
+            `;
+            historyList.appendChild(li);
+        });
+    }
+
+    function refreshChart() {
+        const switchCategoryBtn = document.getElementById('switchCategoryBtn');
+        const legendToggleBtn = document.getElementById('legendToggleBtn');
+
+        if (pieChart) pieChart.destroy();
+        if (heatmapChart) heatmapChart.destroy();
+
+        if (chartMode === 'pie') {
+            switchCategoryBtn.style.display = 'block';
+            legendToggleBtn.style.display = 'block';
+            document.getElementById('pieChart').style.display = 'block';
+            document.getElementById('heatmapChart').style.display = 'none';
+            document.getElementById('chartToggle').textContent = '📈 Tampilkan Heatmap Antar-Kategori';
+            pieChart = new Chart(pieChartCanvas, createPieChartData(categories[current]));
+        } else if (chartMode === 'heatmap-all') {
+            switchCategoryBtn.style.display = 'none';
+            legendToggleBtn.style.display = 'none';
+            document.getElementById('pieChart').style.display = 'none';
+            document.getElementById('heatmapChart').style.display = 'block';
+            document.getElementById('chartToggle').textContent = '📊 Tampilkan Heatmap per Kategori';
+            totalValueDiv.textContent = '';
+            heatmapChart = new Chart(heatmapChartCanvas, createHeatmapData("Semua Aset"));
+        } else if (chartMode === 'heatmap-category') {
+            switchCategoryBtn.style.display = 'block';
+            legendToggleBtn.style.display = 'none';
+            document.getElementById('pieChart').style.display = 'none';
+            document.getElementById('heatmapChart').style.display = 'block';
+            document.getElementById('chartToggle').textContent = '🥧 Tampilkan Pie Chart';
+            heatmapChart = new Chart(heatmapChartCanvas, createHeatmapData(categories[current]));
+        }
+    }
+
+    function toggleChart() {
+        chartMode = chartMode === 'pie' ? 'heatmap-all' : chartMode === 'heatmap-all' ? 'heatmap-category' : 'pie';
+        refreshChart();
+    }
+
+    function switchCategory() {
+        current = (current + 1) % categories.length;
+        refreshChart();
+    }
+
+    function toggleLegend() {
+        if (chartMode === 'pie') {
+            showLegend = !showLegend;
+            refreshChart();
+        }
+    }
+
+    function updateAllDropdowns() {
+        const editSel = document.getElementById('editItemSelect');
+        const delSel = document.getElementById('deleteItemSelect');
+        editSel.innerHTML = '';
+        delSel.innerHTML = '';
+        for (let cat of categories) {
+            if (cat === "Semua Aset") continue;
+            for (let item in data[cat]) {
+                const label = `${item} (${cat}) - Rp${data[cat][item].toLocaleString()}`;
+                const value = `${item}|||${cat}`;
+                editSel.add(new Option(label, value));
+                delSel.add(new Option(label, value));
+            }
+        }
+        fillEditValue();
+    }
+
+    function fillEditValue() {
+        const sel = document.getElementById('editItemSelect');
+        if (!sel.value) return;
+        const [name, cat] = sel.value.split('|||');
+        document.getElementById('editItemValue').value = data[cat][name];
+    }
+
+    function refreshAll() {
+        filterHistory();
+        checkAssetLimit();
+        createExpenseChart();
+        evaluateExpenses();
+        refreshChart();
+        updateAllDropdowns();
+        evaluateAssets();
+    }
+
+    form.addEventListener('submit', async e => {
+        e.preventDefault();
+        await addTransaction();
+    });
+
+    loadData().then(() => {
+        if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+        refreshAll();
+    });
+</script>
+</body>
+</html>
