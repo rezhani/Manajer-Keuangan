@@ -1286,6 +1286,44 @@
         createExpenseChart();
         evaluateExpenses();
     }
+	
+	// New function to update transaction dropdowns
+	function updateTransactionDropdowns() {
+		const categorySelect = document.getElementById('category');
+		const fromAccountSelect = document.getElementById('fromAccount');
+		const toAccountSelect = document.getElementById('toAccount');
+
+		// Clear existing options
+		categorySelect.innerHTML = '';
+		fromAccountSelect.innerHTML = '';
+		toAccountSelect.innerHTML = '';
+
+		// Get all cash assets from the Tunai category
+		const cashAssets = data['Tunai'] ? Object.keys(data['Tunai']) : [];
+
+		// Add default options if no cash assets exist
+		if (cashAssets.length === 0) {
+			const defaultOptions = [
+				{ value: 'Tunai|Bank 1', text: 'Bank 1' },
+				{ value: 'Tunai|Bank 2', text: 'Bank 2' },
+				{ value: 'Tunai|Uang Tunai', text: 'Uang Tunai' }
+			];
+			defaultOptions.forEach(opt => {
+				categorySelect.add(new Option(opt.text, opt.value));
+				fromAccountSelect.add(new Option(opt.text, opt.value));
+				toAccountSelect.add(new Option(opt.text, opt.value));
+			});
+		} else {
+			// Populate dropdowns with cash assets
+			cashAssets.forEach(asset => {
+				const value = `Tunai|${asset}`;
+				const text = asset;
+				categorySelect.add(new Option(text, value));
+				fromAccountSelect.add(new Option(text, value));
+				toAccountSelect.add(new Option(text, value));
+			});
+		}
+	}
 
     function refreshChart() {
         const switchCategoryBtn = document.getElementById('switchCategoryBtn');
@@ -1337,21 +1375,22 @@
     }
 
     function updateAllDropdowns() {
-        const editSel = document.getElementById('editItemSelect');
-        const delSel = document.getElementById('deleteItemSelect');
-        editSel.innerHTML = '';
-        delSel.innerHTML = '';
-        for (let cat of categories) {
-            if (cat === "Semua Aset") continue;
-            for (let item in data[cat]) {
-                const label = `${item} (${cat}) - Rp${data[cat][item].toLocaleString()}`;
-                const value = `${item}|||${cat}`;
-                editSel.add(new Option(label, value));
-                delSel.add(new Option(label, value));
-            }
-        }
-        fillEditValue();
-    }
+		const editSel = document.getElementById('editItemSelect');
+		const delSel = document.getElementById('deleteItemSelect');
+		editSel.innerHTML = '';
+		delSel.innerHTML = '';
+		for (let cat of categories) {
+			if (cat === "Semua Aset") continue;
+			for (let item in data[cat]) {
+				const label = `${item} (${cat}) - Rp${data[cat][item].toLocaleString()}`;
+				const value = `${item}|||${cat}`;
+				editSel.add(new Option(label, value));
+				delSel.add(new Option(label, value));
+			}
+		}
+		fillEditValue();
+		updateTransactionDropdowns(); // Update transaction dropdowns <--- Baris yang ditambahkan
+	}
 
     function fillEditValue() {
         const sel = document.getElementById('editItemSelect');
