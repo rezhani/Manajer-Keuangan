@@ -1240,7 +1240,7 @@
 
         let filteredHistory = history.filter(item => {
             const matchesCategory = filter === 'all' ||
-                (filter === 'Tunai' && item.categoryType === 'Tunai') ||
+                (filter === 'Tunai' && item.categoryType === 'Uang Tunai') ||
                 (filter === 'Bank 1' && item.category === 'Bank 1') ||
                 (filter === 'Bank 2' && item.category === 'Bank 2') ||
                 item.expenseType === filter;
