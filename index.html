@@ -999,7 +999,7 @@
 
         let filteredHistory = history.filter(item => {
             const matchesCategory = filter === 'all' ||
-                (filter === 'Tunai' && item.categoryType === 'Tunai') ||
+                (filter === 'Tunai' && item.categoryType === 'Uang Tunai') ||
                 (filter === 'Bank 1' && item.category === 'Bank 1') ||
                 (filter === 'Bank 2' && item.category === 'Bank 2') ||
                 item.expenseType === filter;
@@ -1173,11 +1173,11 @@
         );
 
         const idealPercentages = { 
-            'kebutuhan_dasar': 50, 
-            'bisnis_etam': 10, 
+            'kebutuhan_dasar': 45, 
+            'bisnis_etam': 20, 
             'investasi': 20, 
-            'gaya_hidup': 15, 
-            'lain_lain': 5
+            'gaya_hidup': 5, 
+            'lain_lain': 10
         };
         
         let analysis = `<h3>Analisis Pengeluaran (Non-Transfer) ${startDateInput && endDateInput ? startDateInput + ' - ' + endDateInput : 'Semua Waktu'}</h3><p><strong>Total:</strong> Rp${totalExpenses.toLocaleString()}</p><ul>`;
