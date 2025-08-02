@@ -489,7 +489,15 @@
             categories = Object.keys(data).concat("Semua Aset");
         }
         localStorage.setItem('data', encryptData(jsonData));
-        return Promise.resolve();
+	
+	// Set default startDate and endDate to current month
+ 	   const currentDate = new Date();
+ 	   const currentYear = currentDate.getFullYear();
+ 	   const currentMonth = String(currentDate.getMonth() + 1).padStart(2, '0'); // Months are 0-based, so add 1
+ 	   const currentMonthString = `${currentYear}-${currentMonth}`;
+	    document.getElementById('startDate').value = currentMonthString;
+	    document.getElementById('endDate').value = currentMonthString;
+	        return Promise.resolve();
     }
 
     function saveData() {
