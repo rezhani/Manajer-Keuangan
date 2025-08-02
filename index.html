@@ -1199,8 +1199,12 @@
                 'gaya_hidup': 'Gaya Hidup',
                 'lain_lain': 'Lain-lain'
             }[type] || type;
-            
-            analysis += `<li>${typeName}: Rp${expenseByType[type].toLocaleString()} (${percentage}%) - ${percentage > ideal ? 'melebihi' : 'di bawah'} ${ideal}%</li>`;
+            const color = type === 'gaya_hidup' && percentage > 5 ? 'red' :
+						 (type === 'kebutuhan_dasar' && percentage > 45) ||
+					  	 (type === 'bisnis_etam' && percentage > 20) ||
+						 (type === 'investasi' && percentage > 20) ? 'green' : 'inherit';
+        
+			analysis += `<li style="color: ${color}">${typeName}: Rp${expenseByType[type].toLocaleString()} (${percentage}%) - ${percentage > ideal ? 'melebihi' : 'di bawah'} ${ideal}%</li>`;
         });
         analysis += `</ul>`;
 
