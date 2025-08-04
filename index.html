@@ -314,6 +314,46 @@
             .crud-sections { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1em; }
             .scrollable-list { max-height: 800px; }
         }
+		
+		.tabs {
+			display: flex;
+			justify-content: center;
+			gap: 1em;
+			margin: 1em 0;
+		}
+
+		.tab-button {
+			padding: 0.8em 1.5em;
+			font-size: 1em;
+			border-radius: 8px;
+			border: 1px solid #2a5298;
+			background: #f0f7ff;
+			color: #2a5298;
+			cursor: pointer;
+			transition: all 0.3s;
+		}
+
+		.tab-button.active {
+			background: linear-gradient(to right, #2a5298, #1e3c72);
+			color: white;
+			border: none;
+		}
+
+		.tab-button:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+		}
+
+		.dark-mode .tab-button {
+			background: #2d2d3a;
+			color: #e0e0e0;
+			border-color: #444;
+		}
+
+		.dark-mode .tab-button.active {
+			background: linear-gradient(to right, #2a5298, #1e3c72);
+			color: white;
+		}
     </style>
 </head>
 <body>
@@ -459,6 +499,19 @@
                 </div>
             </div>
         </div>
+		
+		<!-- All Time Charts Section -->
+		<div class="section">
+			<h2>Grafik All Time</h2>
+			<div class="tabs">
+				<button class="tab-button active" onclick="switchAllTimeTab('assets')">Perkembangan Aset</button>
+				<button class="tab-button" onclick="switchAllTimeTab('expense')">Distribusi Pengeluaran</button>
+			</div>
+			<div class="chart-container">
+				<canvas id="allTimeChart"></canvas>
+			</div>
+		</div>
+		
     </div>
 
     <script>
@@ -1648,6 +1701,7 @@
         refreshChart();
         updateAllDropdowns();
         evaluateAssets();
+		updateAllTimeChart();
     }
 
     form.addEventListener('submit', async e => {
@@ -1659,6 +1713,369 @@
         if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
         refreshAll();
     });
+	
+	let allTimeChart;
+	let currentAllTimeTab = 'assets';
+	const allTimeChartCanvas = document.getElementById("allTimeChart")?.getContext("2d");
+
+	function parseDate(dateStr) {
+		const parts = dateStr.split(/[\s/]+/);
+		if (parts.length < 3) return null;
+		const monthNames = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
+		const month = monthNames.indexOf(parts[1].toLowerCase());
+		if (month === -1) return null;
+		const day = parseInt(parts[0]);
+		const year = parseInt(parts[2] || parts[parts.length - 1]);
+		return new Date(year, month, day);
+	}
+
+	function getTimeframeRange(timeframe) {
+		const now = new Date(2025, 7, 4); // 4 Agustus 2025
+		let startDate;
+		switch (timeframe) {
+			case '1day':
+				startDate = new Date(now);
+				startDate.setHours(0, 0, 0, 0);
+				return { startDate, endDate: now };
+			case '7days':
+				startDate = new Date(now);
+				startDate.setDate(now.getDate() - 6);
+				startDate.setHours(0, 0, 0, 0);
+				return { startDate, endDate: now };
+			case '1month':
+				startDate = new Date(now);
+				startDate.setMonth(now.getMonth() - 1);
+				startDate.setDate(now.getDate() + 1);
+				startDate.setHours(0, 0, 0, 0);
+				return { startDate, endDate: now };
+			default:
+				return null; // Sepanjang waktu, tidak ada filter
+		}
+	}
+
+	function getAllTimeAssets(timeframe) {
+		const range = getTimeframeRange(timeframe);
+		let transaksi = jsonData.transaksi
+			.map(trans => ({ ...trans, parsedDate: parseDate(trans.date) }))
+			.filter(trans => trans.parsedDate);
+
+		if (range) {
+			const { startDate, endDate } = range;
+			transaksi = transaksi.filter(trans => trans.parsedDate >= startDate && trans.parsedDate <= endDate);
+		}
+
+		if (transaksi.length === 0) {
+			return { dailyAssets: [], labels: [], hasData: false };
+		}
+
+		transaksi.sort((a, b) => a.parsedDate - b.parsedDate);
+		let saldoAwal = Object.values(jsonData.assets).reduce((sum, cat) => 
+			sum + Object.values(cat).reduce((sum, val) => sum + (parseFloat(val) || 0), 0), 0);
+
+		if (range) {
+			jsonData.transaksi.forEach(trans => {
+				const transDate = parseDate(trans.date);
+				if (!transDate || transDate >= range.startDate) return;
+				if (trans.title.includes("Tf ") || trans.title.includes("Transfer ")) return;
+				if (trans.categoryType === "Tunai") {
+					saldoAwal += trans.amount;
+				}
+			});
+		} else {
+			jsonData.transaksi.forEach(trans => {
+				const transDate = parseDate(trans.date);
+				if (!transDate) return;
+				if (trans.title.includes("Tf ") || trans.title.includes("Transfer ")) return;
+				if (trans.categoryType === "Tunai") {
+					saldoAwal -= trans.amount;
+				}
+			});
+		}
+
+		const datesWithData = new Set();
+		let currentBalance = saldoAwal;
+		const dailyAssets = [];
+		const labels = [];
+
+		transaksi.forEach(trans => {
+			if (trans.title.includes("Tf ") || trans.title.includes("Transfer ")) return;
+			if (trans.categoryType !== "Tunai") return;
+			const dateStr = trans.parsedDate.toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+			if (!datesWithData.has(dateStr)) {
+				datesWithData.add(dateStr);
+				currentBalance += trans.amount;
+				dailyAssets.push(currentBalance);
+				labels.push(dateStr);
+			} else {
+				const index = labels.indexOf(dateStr);
+				currentBalance += trans.amount;
+				dailyAssets[index] = currentBalance;
+			}
+		});
+
+		return { dailyAssets, labels, hasData: true };
+	}
+
+	function getExpenseDistribution(timeframe) {
+			const range = getTimeframeRange(timeframe);
+			let transaksi = jsonData.transaksi
+				.map(trans => ({ ...trans, parsedDate: parseDate(trans.date) }))
+				.filter(trans => trans.parsedDate && trans.amount < 0 && !trans.title.includes("Tf ") && !trans.title.includes("Transfer ") && trans.categoryType === "Tunai");
+
+			if (range) {
+				const { startDate, endDate } = range;
+				transaksi = transaksi.filter(trans => trans.parsedDate >= startDate && trans.parsedDate <= endDate);
+			}
+
+			const expenseTypes = ['kebutuhan_dasar', 'bisnis_usaha', 'investasi', 'gaya_hidup', 'lain_lain'];
+			const labels = [];
+			const datasets = expenseTypes.map((type, index) => ({
+				label: {
+					'kebutuhan_dasar': 'Kebutuhan Dasar',
+					'bisnis_usaha': 'Bisnis Usaha',
+					'investasi': 'Investasi',
+					'gaya_hidup': 'Gaya Hidup',
+					'lain_lain': 'Lain-lain'
+				}[type] || type,
+				data: [],
+				borderColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'][index],
+				backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'][index],
+				fill: false,
+				tension: 0.1
+			}));
+
+			if (transaksi.length === 0) {
+				return { labels, datasets, total: 0, hasData: false };
+			}
+
+			const dataPoints = new Set();
+			transaksi.forEach(trans => {
+				let dateStr;
+				if (timeframe === '1day') {
+					dateStr = trans.parsedDate.toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+				} else {
+					// Weekly labels for all other timeframes
+					const weekStart = new Date(trans.parsedDate);
+					weekStart.setHours(0, 0, 0, 0);
+					if (weekStart.getDay() !== 1) {
+						weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
+					}
+					const weekEnd = new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000);
+					dateStr = `${weekStart.toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} - ${weekEnd.toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+				}
+				dataPoints.add(dateStr);
+			});
+
+			labels.push(...Array.from(dataPoints).sort((a, b) => {
+				if (timeframe === '1day') {
+					const dateA = parseDate(a);
+					const dateB = parseDate(b);
+					return dateA - dateB;
+				} else {
+					const [startA] = a.split(' - ').map(parseDate);
+					const [startB] = b.split(' - ').map(parseDate);
+					return startA - startB;
+				}
+			}));
+
+			datasets.forEach(dataset => {
+				labels.forEach(() => dataset.data.push(0));
+			});
+
+			transaksi.forEach(trans => {
+				let dateStr;
+				if (timeframe === '1day') {
+					dateStr = trans.parsedDate.toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+				} else {
+					const weekStart = new Date(trans.parsedDate);
+					weekStart.setHours(0, 0, 0, 0);
+					if (weekStart.getDay() !== 1) {
+						weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
+					}
+					const weekEnd = new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000);
+					dateStr = `${weekStart.toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} - ${weekEnd.toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+				}
+				const index = labels.indexOf(dateStr);
+				const typeIndex = expenseTypes.indexOf(trans.expenseType);
+				if (index !== -1 && typeIndex !== -1) {
+					datasets[typeIndex].data[index] += Math.abs(trans.amount);
+				}
+			});
+
+			const total = datasets.reduce((sum, dataset) => sum + dataset.data.reduce((a, b) => a + b, 0), 0);
+			return { labels, datasets, total, hasData: total > 0 };
+		}
+
+	function createAllTimeAssetChart() {
+		const { dailyAssets, labels, hasData } = getAllTimeAssets('all-time');
+		if (allTimeChart) allTimeChart.destroy();
+		if (!hasData || dailyAssets.length === 0) {
+			allTimeChart = new Chart(allTimeChartCanvas, {
+				type: 'bar',
+				data: {
+					labels: [],
+					datasets: [{
+						label: 'Total Aset (Rp)',
+						data: [],
+						backgroundColor: 'rgba(42, 82, 152, 0.6)',
+						borderColor: 'rgba(42, 82, 152, 1)',
+						borderWidth: 1
+					}]
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					scales: {
+						y: {
+							beginAtZero: true,
+							title: { display: true, text: 'Total Aset (Rp)' },
+							ticks: { callback: value => 'Rp' + value.toLocaleString('id-ID') }
+						},
+						x: { title: { display: true, text: 'Tanggal' } }
+					},
+					plugins: {
+						title: {
+							display: true,
+							text: 'Tidak ada data transaksi untuk periode sepanjang waktu',
+							font: { size: 18 }
+						},
+						legend: { position: 'top' },
+						datalabels: { display: false }
+					}
+				},
+				plugins: [ChartDataLabels]
+			});
+			return;
+		}
+
+		allTimeChart = new Chart(allTimeChartCanvas, {
+			type: 'line',
+			data: {
+				labels,
+				datasets: [{
+					label: 'Total Aset (Rp)',
+					data: dailyAssets,
+					backgroundColor: 'rgba(42, 82, 152, 0.2)',
+					borderColor: 'rgba(42, 82, 152, 1)',
+					borderWidth: 2,
+					pointBackgroundColor: 'rgba(42, 82, 152, 1)',
+					fill: true,
+					tension: 0.1
+				}]
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				scales: {
+					y: {
+						beginAtZero: false,
+						title: { display: true, text: 'Total Aset (Rp)' },
+						ticks: { callback: value => 'Rp' + value.toLocaleString('id-ID') }
+					},
+					x: {
+						title: { display: true, text: 'Tanggal' },
+						ticks: { autoSkip: true, maxTicksLimit: 20 }
+					}
+				},
+				plugins: {
+					title: {
+						display: true,
+						text: 'Perkembangan Aset Sepanjang Waktu',
+						font: { size: 18 }
+					},
+					legend: { position: 'top' },
+					datalabels: { display: false }
+				}
+			},
+			plugins: [ChartDataLabels]
+		});
+	}
+
+	function createExpenseDistributionChart() {
+		const { labels, datasets, total, hasData } = getExpenseDistribution('all-time');
+		if (allTimeChart) allTimeChart.destroy();
+		if (!hasData || total === 0) {
+			allTimeChart = new Chart(allTimeChartCanvas, {
+				type: 'line',
+				data: {
+					labels: [],
+					datasets: []
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					scales: {
+						y: {
+							beginAtZero: true,
+							title: { display: true, text: 'Pengeluaran (Rp)' },
+							ticks: { callback: value => 'Rp' + value.toLocaleString('id-ID') }
+						},
+						x: { title: { display: true, text: 'Tanggal' } }
+					},
+					plugins: {
+						title: {
+							display: true,
+							text: 'Tidak ada data pengeluaran untuk periode sepanjang waktu',
+							font: { size: 18 }
+						},
+						legend: { position: 'top' },
+						datalabels: { display: false }
+					}
+				},
+				plugins: [ChartDataLabels]
+			});
+			totalAssetsDiv.textContent = `Total Pengeluaran: Rp${total.toLocaleString('id-ID')}`;
+			return;
+		}
+
+		allTimeChart = new Chart(allTimeChartCanvas, {
+			type: 'line',
+			data: {
+				labels,
+				datasets
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				scales: {
+					y: {
+						beginAtZero: true,
+						title: { display: true, text: 'Pengeluaran (Rp)' },
+						ticks: { callback: value => 'Rp' + value.toLocaleString('id-ID') }
+					},
+					x: {
+						title: { display: true, text: 'Tanggal' },
+						ticks: { autoSkip: true, maxTicksLimit: 20 }
+					}
+				},
+				plugins: {
+					title: {
+						display: true,
+						text: 'Distribusi Pengeluaran Sepanjang Waktu',
+						font: { size: 18 }
+					},
+					legend: { position: 'top' },
+					datalabels: { display: false }
+				}
+			},
+			plugins: [ChartDataLabels]
+		});
+	}
+
+	function switchAllTimeTab(tab) {
+		currentAllTimeTab = tab;
+		document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+		document.querySelector(`.tab-button[onclick="switchAllTimeTab('${tab}')"]`).classList.add('active');
+		updateAllTimeChart();
+	}
+
+	function updateAllTimeChart() {
+		if (currentAllTimeTab === 'assets') {
+			createAllTimeAssetChart();
+		} else {
+			createExpenseDistributionChart();
+		}
+	}
 </script>
 </body>
 </html>
