@@ -26,7 +26,11 @@
             border-radius: 15px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.25);
         }
-
+		
+		label {
+			text-align: center;
+		}
+		
         h1, h2, h3 {
             text-align: center;
             margin-top: 0;
@@ -87,17 +91,17 @@
             box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.2);
             outline: none;
         }
-		
-		.form-note {
-			font-size: 0.9em;
-			color: #666;
-			margin: 0.5em 0 1em;
-			font-style: italic;
-			display: none; /* Hidden by default */
-		}
-		.dark-mode .form-note {
-			color: #aaa;
-		}
+
+        .form-note {
+            font-size: 0.9em;
+            color: #666;
+            margin: 0.5em 0 1em;
+            font-style: italic;
+            display: none; /* Hidden by default */
+        }
+        .dark-mode .form-note {
+            color: #aaa;
+        }
 
         button {
             background: linear-gradient(to right, #2a5298, #1e3c72);
@@ -105,7 +109,7 @@
             border: none;
             font-size: 1.1em;
             cursor: pointer;
-                    font-weight: 600;
+            font-weight: 600;
             transition: all 0.3s;
         }
 
@@ -127,6 +131,7 @@
             background: #f0f7ff;
             border-radius: 12px;
             border-left: 4px solid #2a5298;
+            color: #333; /* Warna teks default untuk tema terang */
         }
 
         .warning {
@@ -231,7 +236,22 @@
         .dark-mode li { background: #252531; }
         .dark-mode .evaluation { background: rgba(42, 82, 152, 0.2); }
         .dark-mode .transaction-details { color: #aaa; }
-        .dark-mode .section { background: rgba(30, 40, 60, 0.6); border-left: 4px solid #8ab4f8; }
+        .dark-mode .section { 
+            background: rgba(30, 40, 60, 0.6); 
+            border-left: 4px solid #8ab4f8; 
+            color: #e0e0e0; /* Warna teks terang untuk tema gelap */
+        }
+        .dark-mode .crud-sections { 
+            color: #e0e0e0; /* Warna teks terang untuk crud-sections */
+        }
+        .dark-mode .crud-sections input,
+        .dark-mode .crud-sections select { 
+            color: #e0e0e0; /* Warna teks input dan select di crud-sections */
+        }
+
+        .crud-sections {
+            color: #333; /* Warna teks default untuk tema terang */
+        }
 
         .transfer-section {
             display: none;
@@ -292,8 +312,8 @@
             .container { max-width: 1000px; }
             .history-grid { grid-template-columns: 1fr 1fr; }
             .crud-sections { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1em; }
-			.scrollable-list { max-height: 800px; }
-		}
+            .scrollable-list { max-height: 800px; }
+        }
     </style>
 </head>
 <body>
@@ -306,10 +326,11 @@
 
     <div class="container">
         <div class="buttons-container">
-            <button onclick="toggleTheme()">🔁 Toggle Tema Gelap</button>
+            <button onclick="toggleTheme()">🔁 Tema Gelap</button>
             <button onclick="backupData()">💾 Backup Data (JSON)</button>
-            <input type="file" id="restoreFile" accept=".json">
-            <button onclick="restoreData()">🔄 Perbarui Data</button>
+			<label for="myfile">Upload Data (JSON)
+				<input type="file" id="restoreFile" accept=".json" onchange="restoreData()">
+			</label>
         </div>
 
         <div id="warning" class="warning" style="display: none;"></div>
@@ -1385,10 +1406,10 @@
                 'gaya_hidup': 'Gaya Hidup',
                 'lain_lain': 'Lain-lain'
             }[type] || type;
-            const color = type === 'gaya_hidup' && percentage > 5 ? 'red' :
+            const color = type === 'gaya_hidup' && percentage > 5 ? '#dc3545' :
 						 (type === 'kebutuhan_dasar' && percentage > 45) ||
 					  	 (type === 'bisnis_usaha' && percentage > 20) ||
-						 (type === 'investasi' && percentage > 20) ? 'green' : 'inherit';
+						 (type === 'investasi' && percentage > 20) ? '#28a745' : 'inherit';
         
 			analysis += `<li style="color: ${color}">${typeName}: Rp${expenseByType[type].toLocaleString()} (${percentage}%) - ${percentage > ideal ? 'melebihi' : 'di bawah'} ${ideal}%</li>`;
         });
@@ -1423,9 +1444,13 @@
 		const startDateInput = document.getElementById('startDate').value;
 		const endDateInput = document.getElementById('endDate').value;
 
+		console.log('Filter dipilih:', filter);
+		console.log('Semua transaksi:', history);
+
 		historyList.innerHTML = '';
 
 		function parseDate(dateStr) {
+			console.log('Parsing date:', dateStr);
 			const parts = dateStr.split(' ');
 			if (parts.length !== 3) {
 				console.warn(`Invalid date format: ${dateStr}`);
@@ -1444,18 +1469,20 @@
 
 		let filteredHistory = history.filter(item => {
 			const matchesCategory = filter === 'all' ||
-				(filter === 'Tunai' && item.categoryType === 'Uang Tunai') ||
-				(filter === 'Bank 1' && item.category === 'Bank 1') ||
+				(filter === 'Tunai' && item.categoryType === 'Tunai') ||
+				(filter === 'Bank 1' && (item.category === 'Bank 1' || item.category === 'Rek Bank 1')) ||
 				(filter === 'Bank 2' && item.category === 'Bank 2') ||
 				item.expenseType === filter;
 			return matchesCategory;
 		});
 
+		console.log('Transaksi setelah filter kategori:', filteredHistory);
+
 		if (startDateInput && endDateInput) {
 			const startDate = new Date(startDateInput + '-01T00:00:00');
 			const endDate = new Date(endDateInput + '-01T23:59:59');
 			endDate.setMonth(endDate.getMonth() + 1);
-			endDate.setDate(0); // Set to last day of the month
+			endDate.setDate(0);
 
 			filteredHistory = filteredHistory.filter(item => {
 				const itemDate = parseDate(item.date);
@@ -1465,31 +1492,37 @@
 				}
 				return itemDate >= startDate && itemDate <= endDate;
 			});
+
+			console.log('Transaksi setelah filter tanggal:', filteredHistory);
 		}
 
-		filteredHistory.forEach((item, index) => {
-			const evaluation = evaluateExpense(item);
-			const li = document.createElement('li');
-			li.innerHTML = `
-				<div class="transaction-header">
-					<div class="transaction-title">${item.title}</div>
-					<div class="transaction-amount ${item.amount < 0 ? 'minus' : 'plus'}">${item.amount < 0 ? '-' : '+'}Rp${Math.abs(item.amount).toLocaleString()}</div>
-				</div>
-				<div class="transaction-details">
-					<div>${item.date}</div>
-					<div>${item.category} (${item.categoryType})</div>
-					<div>${item.expenseType}</div>
-				</div>
-				<div class="evaluation">
-					<strong>Penilaian:</strong> Skor ${evaluation.score}/5<br>
-					<strong>Detail:</strong> Kepentingan ${evaluation.necessity}, Efisiensi ${evaluation.efficiency}, 
-					Dampak ${evaluation.goalAlignment}, Frekuensi ${evaluation.frequency}<br>
-					<strong>Saran:</strong> ${getSuggestion(evaluation.score)}
-				</div>
-				<button class="delete-btn" onclick="deleteTransaction(${index})">Hapus</button>
-			`;
-			historyList.appendChild(li);
-		});
+		if (filteredHistory.length === 0) {
+			historyList.innerHTML = '<li>Tidak ada transaksi yang sesuai dengan filter.</li>';
+		} else {
+			filteredHistory.forEach((item, index) => {
+				const evaluation = evaluateExpense(item);
+				const li = document.createElement('li');
+				li.innerHTML = `
+					<div class="transaction-header">
+						<div class="transaction-title">${item.title}</div>
+						<div class="transaction-amount ${item.amount < 0 ? 'minus' : 'plus'}">${item.amount < 0 ? '-' : '+'}Rp${Math.abs(item.amount).toLocaleString()}</div>
+					</div>
+					<div class="transaction-details">
+						<div>${item.date}</div>
+						<div>${item.category} (${item.categoryType})</div>
+						<div>${item.expenseType}</div>
+					</div>
+					<div class="evaluation">
+						<strong>Penilaian:</strong> Skor ${evaluation.score}/5<br>
+						<strong>Detail:</strong> Kepentingan ${evaluation.necessity}, Efisiensi ${evaluation.efficiency}, 
+						Dampak ${evaluation.goalAlignment}, Frekuensi ${evaluation.frequency}<br>
+						<strong>Saran:</strong> ${getSuggestion(evaluation.score)}
+					</div>
+					<button class="delete-btn" onclick="deleteTransaction(${index})">Hapus</button>
+				`;
+				historyList.appendChild(li);
+			});
+		}
 
 		createExpenseChart();
 		evaluateExpenses();
