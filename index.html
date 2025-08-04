@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajer Keuangan Pribadi</title>
+    <title>Dasbor Perkembangan Aset</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <style>
@@ -11,11 +11,8 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            background-size: cover;
-            background-attachment: fixed;
-            font-size: 16px;
             color: #333;
-            transition: background-color 0.3s;
+            font-size: 16px;
         }
 
         .container {
@@ -26,91 +23,66 @@
             border-radius: 15px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.25);
         }
-		
-		label {
-			text-align: center;
-		}
-		
-        h1, h2, h3 {
+
+        h1, h2 {
             text-align: center;
-            margin-top: 0;
             color: #2a5298;
         }
 
         .header {
-            padding: 1.5em;
+            padding: 1em;
             text-align: center;
             background: rgba(0, 0, 0, 0.3);
             border-radius: 0 0 20px 20px;
-            margin-bottom: 1.5em;
+            color: #fff;
         }
 
         .header h1 {
-            color: #fff;
-            font-size: 2.5em;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-size: 2em;
             background: linear-gradient(to right, #fff, #e0f7ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 0.5em;
-        }
-
-        .header p {
-            color: #e0f7ff;
-            font-size: 1.2em;
-            max-width: 600px;
-            margin: 0 auto;
         }
 
         .chart-container {
             position: relative;
-            height: 50vh;
+            height: 40vh;
             margin: 1em 0;
         }
 
         canvas {
             max-width: 100%;
             height: 100%;
-            margin: 0 auto;
             display: block;
+            margin: 0 auto;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1em;
+            margin: 1em 0;
+            flex-wrap: wrap;
         }
 
         input, select, button {
-            width: 100%;
             padding: 0.8em;
-            margin: 0.7em 0;
             font-size: 1em;
+            border-radius: 8px;
             border: 1px solid #ddd;
-            border-radius: 10px;
-            box-sizing: border-box;
             transition: all 0.3s;
         }
 
-        input:focus, select:focus {
+        input:focus, select:focus, button:focus {
             border-color: #2a5298;
-            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.2);
             outline: none;
-        }
-
-        .form-note {
-            font-size: 0.9em;
-            color: #666;
-            margin: 0.5em 0 1em;
-            font-style: italic;
-            display: none; /* Hidden by default */
-        }
-        .dark-mode .form-note {
-            color: #aaa;
         }
 
         button {
             background: linear-gradient(to right, #2a5298, #1e3c72);
             color: white;
             border: none;
-            font-size: 1.1em;
             cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
         }
 
         button:hover {
@@ -118,94 +90,13 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
-        .buttons-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 0.8em;
-            margin: 1em 0;
-        }
-
-        .section {
-            margin-bottom: 1.5em;
-            padding: 1.5em;
+        .summary {
             background: #f0f7ff;
-            border-radius: 12px;
-            border-left: 4px solid #2a5298;
-            color: #333; /* Warna teks default untuk tema terang */
-        }
-
-        .warning {
-            background: #ffcccc;
             padding: 1em;
             border-radius: 10px;
             text-align: center;
             margin: 1em 0;
         }
-
-        .history-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1.5em;
-        }
-
-        ul {
-            list-style: none;
-            padding-left: 0;
-            max-height: 700px;
-            overflow-y: auto;
-            padding-right: 10px;
-        }
-
-        li {
-            padding: 1em;
-            background: #f9f9f9;
-            border-radius: 8px;
-            margin-bottom: 0.8em;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .transaction-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5em;
-        }
-
-        .transaction-title { font-weight: bold; font-size: 1.1em; }
-        .transaction-amount { font-weight: bold; font-size: 1.1em; }
-        .plus { color: #28a745; }
-        .minus { color: #dc3545; }
-
-        .transaction-details {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9em;
-            color: #666;
-            margin-bottom: 0.5em;
-        }
-
-        .evaluation {
-            padding: 0.8em;
-            background: #e6f0ff;
-            border-radius: 8px;
-            margin-top: 0.5em;
-            font-size: 0.9em;
-        }
-
-        .delete-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 0.5em 1em;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9em;
-            align-self: flex-end;
-        }
-
-        .delete-btn:hover { background: #c82333; }
 
         #toast {
             display: none;
@@ -217,9 +108,7 @@
             color: white;
             padding: 1em 2em;
             border-radius: 50px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             z-index: 1000;
-            font-size: 1em;
         }
 
         .dark-mode {
@@ -228,1437 +117,324 @@
         }
 
         .dark-mode .container { background: rgba(30, 30, 40, 0.92); }
-        .dark-mode h1, .dark-mode h2, .dark-mode h3 { color: #8ab4f8; }
-        .dark-mode input, .dark-mode select { background: #2d2d3a; color: #e0e0e0; border-color: #444; }
-        .dark-mode button { background: linear-gradient(to right, #3a5a9a, #2a3f6f); }
+        .dark-mode h1, .dark-mode h2 { color: #8ab4f8; }
+        .dark-mode input, .dark-mode select, .dark-mode button { background: #2d2d3a; color: #e0e0e0; border-color: #444; }
         .dark-mode button:hover { background: linear-gradient(to right, #2a5298, #1e3c72); }
-        .dark-mode .warning { background: #663333; color: #fff; }
-        .dark-mode li { background: #252531; }
-        .dark-mode .evaluation { background: rgba(42, 82, 152, 0.2); }
-        .dark-mode .transaction-details { color: #aaa; }
-        .dark-mode .section { 
-            background: rgba(30, 40, 60, 0.6); 
-            border-left: 4px solid #8ab4f8; 
-            color: #e0e0e0; /* Warna teks terang untuk tema gelap */
-        }
-        .dark-mode .crud-sections { 
-            color: #e0e0e0; /* Warna teks terang untuk crud-sections */
-        }
-        .dark-mode .crud-sections input,
-        .dark-mode .crud-sections select { 
-            color: #e0e0e0; /* Warna teks input dan select di crud-sections */
-        }
-
-        .crud-sections {
-            color: #333; /* Warna teks default untuk tema terang */
-        }
-
-        .transfer-section {
-            display: none;
-            grid-template-columns: 1fr 1fr;
-            gap: 1em;
-            margin: 1em 0;
-        }
-
-        .debt-section {
-            display: none;
-            margin: 1em 0;
-        }
-
-        .scrollable-list {
-            max-height: 400px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 10px;
-            margin-top: 10px;
-        }
-
-        .scrollable-list::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .scrollable-list::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        .scrollable-list::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
-        }
-
-        .scrollable-list::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        .dark-mode .scrollable-list {
-            border-color: #444;
-        }
-
-        .dark-mode .scrollable-list::-webkit-scrollbar-track {
-            background: #2d2d3a;
-        }
-
-        .dark-mode .scrollable-list::-webkit-scrollbar-thumb {
-            background: #555;
-        }
-
-        .dark-mode .scrollable-list::-webkit-scrollbar-thumb:hover {
-            background: #777;
-        }
+        .dark-mode .summary { background: rgba(30, 40, 60, 0.6); }
 
         @media (min-width: 768px) {
             .container { max-width: 1000px; }
-            .history-grid { grid-template-columns: 1fr 1fr; }
-            .crud-sections { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1em; }
-            .scrollable-list { max-height: 800px; }
+            .chart-container { height: 50vh; }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Manajer Keuangan Pribadi</h1>
-        <p>Kelola aset dan laporan keuangan Anda secara terintegrasi</p>
+        <h1>Dasbor Perkembangan Aset</h1>
+        <p>Lacak perkembangan aset Anda dengan mengunggah data JSON</p>
     </div>
 
     <div id="toast"></div>
 
     <div class="container">
-        <div class="buttons-container">
-            <button onclick="toggleTheme()">🔁 Tema Gelap</button>
-            <button onclick="backupData()">💾 Backup Data (JSON)</button>
-			<label for="myfile">Upload Data (JSON)
-				<input type="file" id="restoreFile" accept=".json" onchange="restoreData()">
-			</label>
+        <div class="controls">
+            <input type="file" id="uploadJson" accept=".json">
+            <button onclick="uploadJsonData()">Upload JSON</button>
+            <select id="monthSelect">
+                <option value="1">Januari</option>
+                <option value="2">Februari</option>
+                <option value="3">Maret</option>
+                <option value="4">April</option>
+                <option value="5">Mei</option>
+                <option value="6" selected>Juni</option>
+                <option value="7">Juli</option>
+                <option value="8">Agustus</option>
+                <option value="9">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+            </select>
+            <select id="yearSelect">
+                <option value="2025" selected>2025</option>
+            </select>
+            <button onclick="updateChart()">Perbarui Grafik</button>
+            <button onclick="toggleTheme()">Toggle Tema Gelap</button>
         </div>
 
-        <div id="warning" class="warning" style="display: none;"></div>
-
-        <!-- Aset Section -->
-        <div class="section">
-            <h2>Manajemen Aset</h2>
-            <div class="buttons-container">
-                <button id="chartToggle" onclick="toggleChart()">📊 Tampilkan Heatmap Antar-Kategori</button>
-                <button id="switchCategoryBtn" onclick="switchCategory()">🔄 Ganti Kategori</button>
-                <button id="legendToggleBtn" onclick="toggleLegend()">👁️ Tampilkan/Sembunyikan Legenda</button>
-            </div>
-            <div class="chart-container">
-                <canvas id="pieChart"></canvas>
-                <canvas id="heatmapChart" style="display: none;"></canvas>
-            </div>
-            <div id="totalValue" class="warning"></div>
-
-            <div class="crud-sections">
-                <div class="section">
-                    <h3>➕ Tambah Item</h3>
-                    <input type="text" id="itemName" placeholder="Nama item">
-                    <input type="number" id="itemValue" placeholder="Nilai (Rp)" min="0" max="100000000">
-                    <select id="itemCategory">
-                        <option value="Investasi">Investasi</option>
-                        <option value="Aset Konsumtif">Aset Konsumtif</option>
-                        <option value="Tunai">Tunai</option>
-                    </select>
-                    <button onclick="addItem()">Tambah Item</button>
-                </div>
-                <div class="section">
-                    <h3>✏️ Edit Item</h3>
-                    <select id="editItemSelect" onchange="fillEditValue()"></select>
-                    <input type="number" id="editItemValue" placeholder="Harga baru" min="0" max="100000000">
-                    <button onclick="updateItem()">Update Nilai</button>
-                </div>
-                <div class="section">
-                    <h3>🗑️ Hapus Item</h3>
-                    <select id="deleteItemSelect"></select>
-                    <button onclick="deleteItem()">Hapus Item</button>
-                </div>
-            </div>
-            <div id="assetEvaluation" class="section"></div>
+        <div class="summary">
+            <h2>Ringkasan Aset</h2>
+            <p id="totalAssets">Total Aset: Rp0</p>
         </div>
 
-        <!-- Keuangan Section -->
-        <div class="section">
-            <h2>Laporan Keuangan</h2>
-            <div class="history-grid">
-                <div>
-                    <h3>➕ Input Transaksi</h3>
-                    <form id="expenseForm">
-                        <input type="text" id="title" required placeholder="Nama Aktivitas">
-                        <input type="number" id="amount" required placeholder="Jumlah (Rp)" min="1" max="100000000">
-                        <select id="transactionType" onchange="toggleSpecialSections()" required>
-                            <option value="normal">Transaksi Normal</option>
-                            <option value="transfer">Transfer Antar Akun</option>
-                        </select>
-                        
-                        <!-- Transfer Section -->
-                        <div class="transfer-section" id="transferSection">
-                            <div>
-                                <label>Dari:</label>
-                                <select id="fromAccount">
-                                    <option value="Tunai|Bank 1">Bank 1</option>
-                                    <option value="Tunai|Bank 2">Bank 2</option>
-                                    <option value="Tunai|Uang Tunai">Uang Tunai</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label>Ke:</label>
-                                <select id="toAccount">
-                                    <option value="Tunai|Bank 1">Bank 1</option>
-                                    <option value="Tunai|Bank 2">Bank 2</option>
-                                    <option value="Tunai|Uang Tunai">Uang Tunai</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <select id="category" required>
-                            <option value="Tunai|Bank 1">Bank 1</option>
-                            <option value="Tunai|Bank 2">Bank 2</option>
-                            <option value="Tunai|Uang Tunai">Uang Tunai</option>
-                        </select>
-                        <select id="expenseType" onchange="toggleBisnisusahaNote(), toggleLainLainNote()" required>
-                            <option value="kebutuhan_dasar">Kebutuhan Dasar</option>
-                            <option value="bisnis_usaha">Bisnis / Usaha</option>
-                            <option value="investasi">Investasi/Tabungan</option>
-                            <option value="gaya_hidup">Gaya Hidup</option>
-                            <option value="lain_lain">Lain-lain</option>
-                        </select>
-						<p id="BisnisusahaNote" class="form-note">*Catatan* Bisnis usaha untuk pengeluaran usaha Energy; bisnis energi hijau (panel surya, scc, inverter, dll).</p>
-						<p id="LainLainNote" class="form-note">*Catatan* Lain-lain merupakan kategori diluar kategori utama seperti hadiah, pajak, sumbangan atau kebutuhan darurat dll).</p>
-                        <select id="type" required>
-                            <option value="-">Pengeluaran (-)</option>
-                            <option value="+">Pemasukan (+)</option>
-                        </select>
-                        <button type="submit">💾 Simpan Transaksi</button>
-                    </form>
-
-                    <h3>📜 Riwayat Transaksi</h3>
-                    <select id="historyFilter" onchange="filterHistory()">
-                        <option value="all">Semua Transaksi</option>
-                        <option value="Tunai">Tunai</option>
-                        <option value="Bank 1">Bank 1</option>
-                        <option value="Bank 2">Bank 2</option>
-                        <option value="kebutuhan_dasar">Kebutuhan Dasar</option>
-                        <option value="bisnis_usaha">Bisnis / Usaha</option>
-                        <option value="investasi">Investasi/Tabungan</option>
-                        <option value="gaya_hidup">Gaya Hidup</option>
-                        <option value="lain_lain">Lain-lain</option>
-                    </select>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1em; margin-bottom: 1em;">
-                        <input type="month" id="startDate" onchange="filterHistory()">
-                        <input type="month" id="endDate" onchange="filterHistory()">
-                    </div>
-                    <div class="scrollable-list">
-                        <ul id="historyList"></ul>
-                    </div>
-                </div>
-                <div>
-                    <div class="chart-container">
-                        <canvas id="expenseChart"></canvas>
-                    </div>
-                    <div id="expenseEvaluation" class="section"></div>
-                </div>
-            </div>
+        <div class="chart-container">
+            <canvas id="assetChart"></canvas>
         </div>
     </div>
 
     <script>
-    const jsonData = {
-        assets: {},
-        transaksi: []
-    };
+        let jsonData = {
+            assets: {},
+            transaksi: []
+        };
 
-    let data = jsonData.assets;
-    let history = jsonData.transaksi;
-    let categories = Object.keys(data).concat("Semua Aset");
-    let current = 0;
-    let showLegend = true;
-    let chartMode = 'pie';
-    let pieChart, heatmapChart, expenseChart;
+        let assetChart;
+        const assetChartCanvas = document.getElementById("assetChart").getContext("2d");
+        const totalAssetsDiv = document.getElementById("totalAssets");
+        const yearSelect = document.getElementById("yearSelect");
 
-    const pieChartCanvas = document.getElementById("pieChart").getContext("2d");
-    const heatmapChartCanvas = document.getElementById("heatmapChart").getContext("2d");
-    const expenseChartCanvas = document.getElementById("expenseChart").getContext("2d");
-    const totalValueDiv = document.getElementById("totalValue");
-    const assetEvaluationDiv = document.getElementById("assetEvaluation");
-    const expenseEvaluationDiv = document.getElementById("expenseEvaluation");
-    const historyList = document.getElementById("historyList");
-    const warningDiv = document.getElementById("warning");
-    const form = document.getElementById("expenseForm");
-    const transferSection = document.getElementById("transferSection");
-
-    function toggleSpecialSections() {
-        const type = document.getElementById("transactionType").value;
-        transferSection.style.display = type === "transfer" ? "grid" : "none";
-    }
-
-    function showToast(message) {
-        const toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.style.display = 'block';
-        setTimeout(() => toast.style.display = 'none', 3000);
-    }
-
-    function encryptData(data) {
-        return btoa(JSON.stringify(data));
-    }
-
-    function decryptData(data) {
-        try {
-            return JSON.parse(atob(data));
-        } catch {
-            return jsonData;
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => toast.style.display = 'none', 3000);
         }
-    }
 
-    function capitalizeWords(str) {
-        return str.replace(/\b\w/g, char => char.toUpperCase());
-    }
-
-    function loadData() {
-        const storedData = localStorage.getItem('data');
-        if (storedData) {
-            Object.assign(jsonData, decryptData(storedData));
-            data = jsonData.assets;
-            history = jsonData.transaksi;
-            categories = Object.keys(data).concat("Semua Aset");
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
         }
-        localStorage.setItem('data', encryptData(jsonData));
-	
-	// Set default startDate and endDate to current month
- 	    const currentDate = new Date();
- 	    const currentYear = currentDate.getFullYear();
- 	    const currentMonth = String(currentDate.getMonth() + 1).padStart(2, '0'); // Months are 0-based, so add 1
- 	    const currentMonthString = `${currentYear}-${currentMonth}`;
-	    document.getElementById('startDate').value = currentMonthString;
-	    document.getElementById('endDate').value = currentMonthString;
-	        return Promise.resolve();
-    }
 
-    function saveData() {
-        localStorage.setItem('data', encryptData(jsonData));
-        return Promise.resolve();
-    }
+        function calculateTotalAssets() {
+            let total = 0;
+            
+            if (jsonData.assets.Investasi) {
+                total += Object.values(jsonData.assets.Investasi).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
+            }
+            
+            if (jsonData.assets.Tunai) {
+                total += Object.values(jsonData.assets.Tunai).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
+            }
+            
+            if (jsonData.assets["Aset Konsumtif"]) {
+                total += Object.values(jsonData.assets["Aset Konsumtif"]).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
+            }
+            
+            return total;
+        }
 
-    function backupData() {
-        const dataStr = JSON.stringify(jsonData);
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'keuangan_backup.json';
-        a.click();
-        URL.revokeObjectURL(url);
-        showToast('Data berhasil dibackup!');
-    }
+        function parseDate(dateStr) {
+            const parts = dateStr.split(/[\s/]+/);
+            if (parts.length < 3) return null;
+            const monthNames = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
+            const month = monthNames.indexOf(parts[1].toLowerCase());
+            if (month === -1) return null;
+            const day = parseInt(parts[0]);
+            const year = parseInt(parts[2] || parts[parts.length - 1]);
+            return new Date(year, month, day);
+        }
 
-    function restoreData() {
-        const file = document.getElementById('restoreFile').files[0];
-        if (!file) return showToast('Pilih file JSON terlebih dahulu');
-        const reader = new FileReader();
-        reader.onload = e => {
-            try {
-                Object.assign(jsonData, JSON.parse(e.target.result));
-                data = jsonData.assets;
-                history = jsonData.transaksi;
-                categories = Object.keys(data).concat("Semua Aset");
-                saveData().then(() => {
-                    refreshAll();
-                    showToast('Data berhasil direstore!');
-                    location.reload();
+        function updateYearDropdown() {
+            const years = new Set(jsonData.transaksi.map(trans => {
+                const date = parseDate(trans.date);
+                return date ? date.getFullYear() : null;
+            }).filter(year => year));
+            
+            yearSelect.innerHTML = '';
+            
+            if (years.size === 0) {
+                const option = document.createElement('option');
+                option.value = 2025;
+                option.textContent = 2025;
+                option.selected = true;
+                yearSelect.appendChild(option);
+            } else {
+                Array.from(years).sort().forEach(year => {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    if (year === 2025) option.selected = true;
+                    yearSelect.appendChild(option);
                 });
-            } catch {
-                showToast('File JSON tidak valid');
             }
-        };
-        reader.readAsText(file);
-    }
-
-    function toggleTheme() {
-        document.body.classList.toggle('dark-mode');
-        localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
-    }
-	
-	function toggleBisnisusahaNote() {
-		const expenseType = document.getElementById('expenseType').value;
-		document.getElementById('BisnisusahaNote').style.display = expenseType === 'bisnis_usaha' ? 'block' : 'none';
-	}
-	
-	function toggleLainLainNote() {
-		const expenseType = document.getElementById('expenseType').value;
-		document.getElementById('LainLainNote').style.display = expenseType === 'lain_lain' ? 'block' : 'none';
-	}
-
-    // Grafik Pie Functions
-    function createPieChartData(category) {
-		let mergedData = category === "Semua Aset" ? Object.assign({}, ...Object.values(data)) : data[category] || {};
-		let sorted = Object.entries(mergedData).filter(([_, value]) => value > 0).sort((a, b) => b[1] - a[1]);
-
-		let displayItems = sorted.slice(0, 10);
-		const otherItems = sorted.slice(10);
-
-		if (otherItems.length > 0) {
-			const otherTotal = otherItems.reduce((sum, item) => sum + item[1], 0);
-			if (otherTotal > 0) {
-				displayItems.push(["Lain-lain", otherTotal]);
-			}
-		}
-
-		const labels = displayItems.map(e => e[0]);
-		const values = displayItems.map(e => e[1]);
-		const total = sorted.reduce((sum, item) => sum + item[1], 0);
-
-		totalValueDiv.textContent = `Total ${category}: Rp${total.toLocaleString()}`;
-
-		console.log('Pie chart data:', { category, labels, values, total }); // Debugging
-
-		if (values.length === 0 || values.every(v => v === 0)) {
-			totalValueDiv.textContent += ' (Tidak ada data untuk ditampilkan)';
-			return {
-				type: 'pie',
-				data: {
-					labels: [],
-					datasets: [{
-						data: [],
-						backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796', '#5a5c69', '#3a3b45', '#2e59d9', '#17a673', '#6c757d']
-					}]
-				},
-				options: {
-					responsive: true,
-					maintainAspectRatio: false,
-					plugins: {
-						title: {
-							display: true,
-							text: `Kategori: ${category} (Tidak ada data)`,
-							font: { size: 18 }
-						},
-						legend: { display: false },
-						datalabels: { display: false }
-					}
-				}
-			};
-		}
-
-		return {
-			type: 'pie',
-			data: {
-				labels,
-				datasets: [{
-					data: values,
-					backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796', '#5a5c69', '#3a3b45', '#2e59d9', '#17a673', '#6c757d']
-				}]
-			},
-			options: {
-				responsive: true,
-				maintainAspectRatio: false,
-				plugins: {
-					title: {
-						display: true,
-						text: `Kategori: ${category}`,
-						font: { size: 18 }
-					},
-					legend: {
-						display: showLegend,
-						position: 'bottom',
-						labels: {
-							font: { size: 12 },
-							generateLabels: chart => chart.data.labels.map((label, i) => ({
-								text: `${label} (Rp${chart.data.datasets[0].data[i].toLocaleString()})`,
-								fillStyle: chart.data.datasets[0].backgroundColor[i],
-								index: i
-							}))
-						}
-					},
-					datalabels: {
-						color: '#000',
-						font: { weight: 'bold', size: 12 },
-						formatter: (v, ctx) => {
-							const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-							return `Rp${v.toLocaleString()}\n${(v / total * 100).toFixed(1)}%`;
-						}
-					}
-				}
-			},
-			plugins: [ChartDataLabels]
-		};
-	}
-
-    function createHeatmapData(category) {
-        let labels, values;
-        if (category === "Semua Aset") {
-            labels = Object.keys(data).filter(cat => cat !== "Semua Aset");
-            values = labels.map(cat => Object.values(data[cat]).reduce((sum, val) => sum + (parseFloat(val) || 0), 0));
-        } else {
-            const mergedData = data[category] || {};
-            let sorted = Object.entries(mergedData).sort((a, b) => b[1] - a[1]);
-            labels = sorted.map(e => e[0]);
-            values = sorted.map(e => e[1]);
-            totalValueDiv.textContent = `Total ${category}: Rp${values.reduce((a, b) => a + b, 0).toLocaleString()}`;
         }
 
-        const maxValue = Math.max(...values, 1);
-        const colors = values.map(val => `rgb(${Math.floor(200 * (1 - val / maxValue))}, ${Math.floor(200 * val / maxValue)}, 0)`);
+        function getDateRange(month, year) {
+            const startDate = new Date(year, month - 1, 1);
+            const endDate = new Date(year, month, 0);
+            return { startDate, endDate };
+        }
 
-        return {
-            type: 'bar',
-            data: {
+        function getDailyAssets(month, year) {
+            const { startDate, endDate } = getDateRange(month, year);
+            const daysInMonth = endDate.getDate();
+            const dailyAssets = new Array(daysInMonth).fill(null);
+            
+            const transaksiBulanIni = jsonData.transaksi
+                .map(trans => ({ ...trans, parsedDate: parseDate(trans.date) }))
+                .filter(trans => trans.parsedDate && trans.parsedDate >= startDate && trans.parsedDate <= endDate)
+                .sort((a, b) => a.parsedDate - b.parsedDate);
+
+            if (transaksiBulanIni.length === 0) {
+                return { dailyAssets: [], labels: [], hasData: false };
+            }
+
+            // Hitung saldo awal
+            let saldoAwal = calculateTotalAssets();
+            
+            // Koreksi saldo awal dengan transaksi sebelum bulan ini
+            jsonData.transaksi.forEach(trans => {
+                const transDate = parseDate(trans.date);
+                if (!transDate || transDate >= startDate) return;
+                
+                // Skip transfer antar rekening
+                if (trans.title.includes("Tf ") || trans.title.includes("Transfer ")) return;
+                
+                if (trans.categoryType === "Tunai") {
+                    saldoAwal += trans.amount;
+                }
+            });
+
+            // Proses transaksi bulan ini
+            let currentBalance = saldoAwal;
+            const datesWithData = new Set();
+            
+            transaksiBulanIni.forEach(trans => {
+                const day = trans.parsedDate.getDate();
+                datesWithData.add(day);
+                
+                // Skip transfer antar rekening
+                if (trans.title.includes("Tf ") || trans.title.includes("Transfer ")) return;
+                
+                if (trans.categoryType === "Tunai") {
+                    currentBalance += trans.amount;
+                    dailyAssets[day - 1] = currentBalance;
+                }
+            });
+
+            // Buat array hanya untuk tanggal yang ada datanya
+            const sortedDates = Array.from(datesWithData).sort((a, b) => a - b);
+            const filteredAssets = sortedDates.map(day => dailyAssets[day - 1]);
+            const labels = sortedDates.map(day => day.toString());
+
+            return { 
+                dailyAssets: filteredAssets, 
                 labels,
-                datasets: [{
-                    label: category === "Semua Aset" ? 'Total Nilai Kategori (Rp)' : `Nilai Item dalam ${category} (Rp)`,
-                    data: values,
-                    backgroundColor: colors,
-                    borderColor: colors,
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: { y: { beginAtZero: true, ticks: { callback: value => 'Rp' + value.toLocaleString(), font: { size: 12 } } }, x: { ticks: { font: { size: 12 } } } },
-                plugins: { title: { display: true, text: category === "Semua Aset" ? 'Heatmap Total Nilai Kategori' : `Heatmap Item dalam ${category}`, font: { size: 18 } }, legend: { display: false }, datalabels: { anchor: 'end', align: 'top', formatter: value => 'Rp' + value.toLocaleString(), color: '#000', font: { weight: 'bold', size: 12 } } }
-            },
-            plugins: [ChartDataLabels]
-        };
-    }
-
-    async function addItem() {
-        const name = capitalizeWords(document.getElementById('itemName').value.trim());
-        const value = parseInt(document.getElementById('itemValue').value);
-        const category = document.getElementById('itemCategory').value;
-
-        if (!name || isNaN(value) || value < 0) return showToast("Isi semua field dengan nilai valid");
-
-        await loadData();
-        if (!data[category]) data[category] = {};
-        data[category][name] = value;
-        jsonData.assets = data;
-        await saveData();
-        showToast(`"${name}" ditambahkan ke "${category}"`);
-        refreshAll();
-        document.getElementById('itemName').value = '';
-        document.getElementById('itemValue').value = '';
-    }
-
-    async function updateItem() {
-        const sel = document.getElementById('editItemSelect');
-        const [name, cat] = sel.value.split('|||');
-        const value = parseInt(document.getElementById('editItemValue').value);
-
-        if (isNaN(value) || value < 0) return showToast("Masukkan nilai valid");
-
-        await loadData();
-        data[cat][name] = value;
-        jsonData.assets = data;
-        await saveData();
-        showToast(`"${name}" diupdate ke Rp${value.toLocaleString()}`);
-        refreshAll();
-    }
-
-    async function deleteItem() {
-        const sel = document.getElementById('deleteItemSelect');
-        const [name, cat] = sel.value.split('|||');
-
-        await loadData();
-        delete data[cat][name];
-        if (Object.keys(data[cat]).length === 0) delete data[cat];
-        jsonData.assets = data;
-        categories = Object.keys(data).concat("Semua Aset");
-        await saveData();
-        showToast(`"${name}" dihapus dari "${cat}"`);
-        refreshAll();
-    }
-
-    function evaluateAssets() {
-        const monthlyIncome = 4700000;
-        const totalAssets = Object.values(data).reduce((sum, cat) => sum + Object.values(cat).reduce((sum, val) => sum + (parseFloat(val) || 0), 0), 0);
-        const categoryTotals = {};
-        const categoryPercentages = {};
-        for (let cat of categories) {
-            if (cat === "Semua Aset") continue;
-            const total = Object.values(data[cat]).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
-            categoryTotals[cat] = total;
-            categoryPercentages[cat] = totalAssets ? ((total / totalAssets) * 100).toFixed(1) : 0;
+                hasData: true 
+            };
         }
 
-        const startDateInput = document.getElementById('startDate').value;
-        const endDateInput = document.getElementById('endDate').value;
+        function createAssetChart(month, year) {
+            const { dailyAssets, labels, hasData } = getDailyAssets(month, year);
+            
+            if (assetChart) assetChart.destroy();
+            
+            if (!hasData || dailyAssets.length === 0) {
+                assetChart = new Chart(assetChartCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Total Aset (Rp)',
+                            data: [],
+                            backgroundColor: 'rgba(42, 82, 152, 0.6)',
+                            borderColor: 'rgba(42, 82, 152, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Total Aset (Rp)' },
+                                ticks: { callback: value => 'Rp' + value.toLocaleString('id-ID') }
+                            },
+                            x: { title: { display: true, text: 'Tanggal' } }
+                        },
+                        plugins: {
+                            title: { 
+                                display: true, 
+                                text: `Tidak ada data transaksi untuk ${new Date(year, month - 1).toLocaleString('id-ID', { month: 'long', year: 'numeric' })}`, 
+                                font: { size: 18 } 
+                            },
+                            legend: { position: 'top' },
+                            datalabels: { display: false }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
+                
+                totalAssetsDiv.textContent = `Total Aset: Rp${calculateTotalAssets().toLocaleString('id-ID')}`;
+                return;
+            }
 
-        function parseDate(dateStr) {
-            const parts = dateStr.split(' ');
-            if (parts.length !== 3) return null;
-            const monthNames = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
-            const day = parseInt(parts[0], 10);
-            const month = monthNames.indexOf(parts[1].toLowerCase());
-            const year = parseInt(parts[2], 10);
-            if (month === -1 || isNaN(day) || isNaN(year)) return null;
-            return new Date(year, month, day);
-        }
-
-        let monthlyLifestyleExpenses = 0;
-        if (startDateInput && endDateInput) {
-            const startDate = new Date(startDateInput + '-01');
-            const endDate = new Date(endDateInput + '-01');
-            endDate.setMonth(endDate.getMonth() + 1);
-            endDate.setDate(endDate.getDate() - 1);
-
-            monthlyLifestyleExpenses = jsonData.transaksi
-                .filter(item => {
-                    const itemDate = parseDate(item.date);
-                    return item.expenseType === 'gaya_hidup' && 
-                           item.amount < 0 && 
-                           itemDate >= startDate && 
-                           itemDate <= endDate && 
-                           !isNaN(itemDate.getTime());
-                })
-                .reduce((sum, item) => sum + Math.abs(item.amount), 0);
-        } else {
-            const thirtyDaysAgo = new Date();
-            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-            monthlyLifestyleExpenses = jsonData.transaksi
-                .filter(item => {
-                    const itemDate = parseDate(item.date);
-                    return item.expenseType === 'gaya_hidup' && 
-                           item.amount < 0 && 
-                           itemDate >= thirtyDaysAgo && 
-                           !isNaN(itemDate.getTime());
-                })
-                .reduce((sum, item) => sum + Math.abs(item.amount), 0);
-        }
-
-        const emergencyFundTarget = monthlyIncome * 6;
-        const investmentTarget = totalAssets * 0.3;
-        const consumptiveTarget = totalAssets * 0.3;
-
-        let evaluation = `<h3>Penilaian Aset</h3><p><strong>Total Aset:</strong> Rp${totalAssets.toLocaleString()}</p><ul>`;
-        for (let cat of categories) {
-            if (cat === "Semua Aset") continue;
-            evaluation += `<li>${cat}: Rp${categoryTotals[cat].toLocaleString()} (${categoryPercentages[cat]}%)</li>`;
-        }
-        evaluation += `</ul><p><strong>Analisis:</strong></p><ul>`;
-
-        const cashBalance = categoryTotals['Tunai'] || 0;
-        evaluation += `<li><strong>Tunai:</strong> Rp${cashBalance.toLocaleString()} - ${cashBalance < emergencyFundTarget ? `Kurang; target Rp${emergencyFundTarget.toLocaleString()}` : 'Cukup'}</li>`;
-
-        const investmentBalance = categoryTotals['Investasi'] || 0;
-        evaluation += `<li><strong>Investasi:</strong> Rp${investmentBalance.toLocaleString()} - ${investmentBalance < investmentTarget ? `Kurang; target Rp${investmentTarget.toLocaleString()}` : 'Optimal'}</li>`;
-
-        const consumptiveBalance = categoryTotals['Aset Konsumtif'] || 0;
-        evaluation += `<li><strong>Aset Konsumtif:</strong> Rp${consumptiveBalance.toLocaleString()} - ${consumptiveBalance > consumptiveTarget ? `Terlalu besar; batasi Rp${consumptiveTarget.toLocaleString()}` : 'Sesuai'}</li>`;
-
-        const lifestyleTarget = monthlyIncome * 0.3;
-        evaluation += `<li><strong>Gaya Hidup (Periode Terpilih):</strong> Rp${monthlyLifestyleExpenses.toLocaleString()} - ${monthlyLifestyleExpenses > lifestyleTarget ? `Melebihi Rp${lifestyleTarget.toLocaleString()}` : 'Terkendali'}</li></ul>`;
-
-        evaluation += `<p><strong>Saran:</strong></p><ul>`;
-        if (cashBalance < emergencyFundTarget) evaluation += `<li>Tambah Rp${Math.min(monthlyIncome * 0.2, emergencyFundTarget - cashBalance).toLocaleString()}/bulan ke tunai.</li>`;
-        if (investmentBalance < investmentTarget) evaluation += `<li>Alokasikan Rp${Math.min(monthlyIncome * 0.2, investmentTarget - investmentBalance).toLocaleString()}/bulan ke investasi.</li>`;
-        if (consumptiveBalance > consumptiveTarget) {
-            const items = Object.entries(data['Aset Konsumtif'] || {}).sort((a, b) => b[1] - a[1]).filter(([_, v]) => v <= totalAssets * 0.05).slice(0, 3).map(([n]) => n);
-            evaluation += `<li>Kurangi aset konsumtif: ${items.length ? `jual ${items.join(', ')}` : 'batasi pembelian baru'}.</li>`;
-        }
-        if (monthlyLifestyleExpenses > lifestyleTarget) evaluation += `<li>Batasi gaya hidup <Rp${lifestyleTarget.toLocaleString()}/bulan.</li>`;
-        evaluation += `<li>Alokasi ideal: 50% kebutuhan (Rp${(monthlyIncome * 0.5).toLocaleString()}), 30% gaya hidup (Rp${lifestyleTarget.toLocaleString()}), 20% tabungan (Rp${(monthlyIncome * 0.2).toLocaleString()}).</li></ul>`;
-
-        assetEvaluationDiv.innerHTML = evaluation;
-    }
-
-    // Keuangan Functions
-    function createExpenseChart() {
-    const startDateInput = document.getElementById('startDate').value;
-    const endDateInput = document.getElementById('endDate').value;
-
-    function parseDate(dateStr) {
-        const parts = dateStr.split(' ');
-        if (parts.length !== 3) return null;
-        const monthNames = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
-        const day = parseInt(parts[0], 10);
-        const month = monthNames.indexOf(parts[1].toLowerCase());
-        const year = parseInt(parts[2], 10);
-        if (month === -1 || isNaN(day) || isNaN(year)) return null;
-        return new Date(year, month, day);
-    }
-
-    let filteredHistory = history.filter(item => item.expenseType !== 'transfer');
-    if (startDateInput && endDateInput) {
-        const startDate = new Date(startDateInput + '-01');
-        const endDate = new Date(endDateInput + '-01');
-        endDate.setMonth(endDate.getMonth() + 1);
-        endDate.setDate(endDate.getDate() - 1);
-
-        filteredHistory = filteredHistory.filter(item => {
-            const itemDate = parseDate(item.date);
-            return itemDate >= startDate && itemDate <= endDate && !isNaN(itemDate.getTime());
-        });
-    }
-
-    const expenseTypes = ['kebutuhan_dasar', 'bisnis_usaha', 'investasi', 'gaya_hidup', 'lain_lain'];
-    const values = expenseTypes.map(type => 
-        filteredHistory
-            .filter(item => item.expenseType === type && item.amount < 0)
-            .reduce((sum, item) => sum + Math.abs(item.amount), 0)
-    );
-
-    // Filter out categories with zero values
-    const filteredLabels = [];
-    const filteredValues = [];
-    expenseTypes.forEach((type, index) => {
-        if (values[index] > 0) { // Only include categories with non-zero values
-            filteredLabels.push({
-                'kebutuhan_dasar': 'Kebutuhan Dasar',
-                'bisnis_usaha': 'Bisnis / Usaha',
-                'investasi': 'Investasi/Tabungan',
-                'gaya_hidup': 'Gaya Hidup',
-                'lain_lain': 'Lain-lain'
-            }[type] || type);
-            filteredValues.push(values[index]);
-        }
-    });
-
-    if (expenseChart) expenseChart.destroy();
-    expenseChart = new Chart(expenseChartCanvas, {
-        type: 'pie',
-        data: {
-            labels: filteredLabels,
-            datasets: [{ 
-                data: filteredValues, 
-                backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'] 
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: { 
-                    display: true, 
-                    text: `Distribusi Pengeluaran (Non-Transfer) ${startDateInput && endDateInput ? startDateInput + ' - ' + endDateInput : 'Semua Waktu'}`, 
-                    font: { size: 18 } 
+            assetChart = new Chart(assetChartCanvas, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Total Aset (Rp)',
+                        data: dailyAssets,
+                        backgroundColor: 'rgba(42, 82, 152, 0.2)',
+                        borderColor: 'rgba(42, 82, 152, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(42, 82, 152, 1)',
+                        fill: true,
+                        tension: 0.1
+                    }]
                 },
-                legend: { 
-                    position: 'bottom', 
-                    labels: { font: { size: 12 } } 
-                },
-                datalabels: { 
-                    color: '#000', 
-                    font: { weight: 'bold', size: 12 }, 
-                    formatter: (v, ctx) => {
-                        const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                        return `Rp${v.toLocaleString()}\n${(v / total * 100).toFixed(1)}%`;
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: { display: true, text: 'Total Aset (Rp)' },
+                            ticks: { callback: value => 'Rp' + value.toLocaleString('id-ID') }
+                        },
+                        x: { title: { display: true, text: 'Tanggal' } }
+                    },
+                    plugins: {
+                        title: { 
+                            display: true, 
+                            text: `Perkembangan Aset - ${new Date(year, month - 1).toLocaleString('id-ID', { month: 'long', year: 'numeric' })}`, 
+                            font: { size: 18 } 
+                        },
+                        legend: { position: 'top' },
+                        datalabels: { display: false }
                     }
+                },
+                plugins: [ChartDataLabels]
+            });
+
+            const totalAkhir = dailyAssets.length > 0 ? dailyAssets[dailyAssets.length - 1] : calculateTotalAssets();
+            totalAssetsDiv.textContent = `Total Aset: Rp${totalAkhir.toLocaleString('id-ID')}`;
+        }
+
+        function uploadJsonData() {
+            const fileInput = document.getElementById('uploadJson');
+            const file = fileInput.files[0];
+            if (!file) return showToast('Pilih file JSON terlebih dahulu');
+
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const uploadedData = JSON.parse(e.target.result);
+                    if (!uploadedData.assets || !uploadedData.transaksi) {
+                        throw new Error('Format JSON tidak valid: harus mengandung "assets" dan "transaksi"');
+                    }
+                    jsonData = uploadedData;
+                    updateYearDropdown();
+                    updateChart();
+                    showToast('Data JSON berhasil diunggah');
+                } catch (error) {
+                    showToast('Error: ' + error.message);
                 }
-            }
-        },
-        plugins: [ChartDataLabels]
-    });
-}
-
-	function createAssetChart() {
-		// Pastikan canvas ada
-		const assetChartCanvas = document.getElementById('assetChart');
-		if (!assetChartCanvas) {
-			console.error('Error: Canvas element with ID "assetChart" not found in the DOM');
-			expenseEvaluationDiv.innerHTML = '<p>Error: Tidak dapat menemukan elemen canvas untuk grafik aset.</p>';
-			return;
-		}
-
-		// Pastikan Chart.js dan ChartDataLabels tersedia
-		if (typeof Chart === 'undefined' || typeof ChartDataLabels === 'undefined') {
-			console.error('Error: Chart.js or ChartDataLabels library not loaded');
-			expenseEvaluationDiv.innerHTML = '<p>Error: Library grafik tidak dimuat.</p>';
-			return;
-		}
-
-		// Ambil data aset investasi dari jsonData
-		const investasi = jsonData?.assets?.Investasi || {};
-		console.log('Investasi data:', investasi);
-
-		const assetTypes = ['Saham', 'Reksadana Saham', 'Obligasi', 'Pasar Uang', 'Crypto'];
-		const values = assetTypes.map(type => investasi[type] || 0);
-
-		console.log('Asset values by type:', values);
-
-		// Filter out categories with zero values
-		const filteredLabels = [];
-		const filteredValues = [];
-		assetTypes.forEach((type, index) => {
-			if (values[index] > 0) {
-				filteredLabels.push(type);
-				filteredValues.push(values[index]);
-			}
-		});
-
-		console.log('Filtered labels:', filteredLabels);
-		console.log('Filtered values:', filteredValues);
-
-		// Jika tidak ada data valid, tampilkan pesan
-		if (filteredValues.length === 0 || filteredValues.every(v => v === 0)) {
-			assetChartCanvas.style.display = 'none';
-			expenseEvaluationDiv.innerHTML = '<p>Tidak ada data aset investasi untuk ditampilkan.</p>';
-			return;
-		} else {
-			assetChartCanvas.style.display = 'block';
-		}
-
-		// Hancurkan grafik sebelumnya jika ada
-		if (window.assetChart instanceof Chart) {
-			window.assetChart.destroy();
-		}
-
-		try {
-			window.assetChart = new Chart(assetChartCanvas, {
-				type: 'pie',
-				data: {
-					labels: filteredLabels,
-					datasets: [{
-						data: filteredValues,
-						backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b']
-					}]
-				},
-				options: {
-					responsive: true,
-					maintainAspectRatio: false,
-					plugins: {
-						title: {
-							display: true,
-							text: 'Distribusi Aset Investasi',
-							font: { size: 18 }
-						},
-						legend: {
-							position: 'bottom',
-							labels: { font: { size: 12 } }
-						},
-						datalabels: {
-							color: '#000',
-							font: { weight: 'bold', size: 12 },
-							formatter: (value, ctx) => {
-								const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-								return `Rp${value.toLocaleString()}\n${(value / total * 100).toFixed(1)}%`;
-							}
-						}
-					}
-				},
-				plugins: [ChartDataLabels]
-			});
-			console.log('Asset chart created successfully');
-		} catch (error) {
-			console.error('Error creating asset chart:', error);
-			assetChartCanvas.style.display = 'none';
-			expenseEvaluationDiv.innerHTML = '<p>Error: Tidak dapat membuat grafik aset investasi.</p>';
-		}
-	}
-
-    function evaluateTransfers() {
-		const startDateInput = document.getElementById('startDate').value;
-		const endDateInput = document.getElementById('endDate').value;
-
-		function parseDate(dateStr) {
-			const parts = dateStr.split(' ');
-			if (parts.length !== 3) return null;
-			const monthNames = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
-			const day = parseInt(parts[0], 10);
-			const month = monthNames.indexOf(parts[1].toLowerCase());
-			const year = parseInt(parts[2], 10);
-			if (month === -1 || isNaN(day) || isNaN(year)) return null;
-			return new Date(year, month, day);
-		}
-
-		let transferHistory = history.filter(item => item.expenseType === 'transfer' && item.amount < 0);
-
-		if (startDateInput && endDateInput) {
-			const startDate = new Date(startDateInput + '-01');
-			const endDate = new Date(endDateInput + '-01');
-			endDate.setMonth(endDate.getMonth() + 1);
-			endDate.setDate(endDate.getDate() - 1);
-
-			transferHistory = transferHistory.filter(item => {
-				const itemDate = parseDate(item.date);
-				return itemDate && itemDate >= startDate && itemDate <= endDate && !isNaN(itemDate.getTime());
-			});
-		} else {
-			// Default to current month if no input
-			const currentDate = new Date();
-			const startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-			const endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-
-			transferHistory = transferHistory.filter(item => {
-				const itemDate = parseDate(item.date);
-				return itemDate && itemDate >= startDate && itemDate <= endDate && !isNaN(itemDate.getTime());
-			});
-		}
-
-		const totalTransfers = transferHistory.reduce((sum, item) => sum + Math.abs(item.amount), 0);
-
-		const period = startDateInput && endDateInput ? `${startDateInput} - ${endDateInput}` : new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
-		let analysis = `<h3>Analisis Transfer (${period})</h3>`;
-		analysis += `<p><strong>Total Transfer:</strong> Rp${totalTransfers.toLocaleString()}</p>`;
-
-		const transferMap = {};
-		transferHistory.forEach(item => {
-			const tujuan = item.title.split(' ke ')[1] || 'Tidak diketahui';
-			const key = `${item.category} → ${tujuan}`;
-			transferMap[key] = (transferMap[key] || 0) + Math.abs(item.amount);
-		});
-
-		analysis += `<ul>`;
-		if (Object.keys(transferMap).length === 0) {
-			analysis += `<li>Tidak ada transaksi transfer untuk periode ini.</li>`;
-		} else {
-			for (const [transfer, amount] of Object.entries(transferMap)) {
-				analysis += `<li>${transfer}: Rp${amount.toLocaleString()}</li>`;
-			}
-		}
-		analysis += `</ul>`;
-
-		return analysis;
-	}
-
-
-    async function addTransaction() {
-        const transactionType = document.getElementById('transactionType').value;
-        const title = capitalizeWords(document.getElementById('title').value.trim());
-        const amount = parseInt(document.getElementById('amount').value);
-        const type = document.getElementById('type').value;
-        const date = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
-
-        if (!title || isNaN(amount) || amount <= 0) return showToast("Isi semua field dengan nilai valid");
-
-        await loadData();
-        let transaksi = { title, amount: type === '-' ? -amount : amount, date };
-        
-        if (transactionType === "transfer") {
-            const fromAccount = document.getElementById('fromAccount').value;
-            const toAccount = document.getElementById('toAccount').value;
-            
-            const [fromType, fromCat] = fromAccount.split('|');
-            const [toType, toCat] = toAccount.split('|');
-            
-            transaksi = {
-                title: `Transfer dari ${fromCat} ke ${toCat}`,
-                amount: -amount,
-                category: fromCat,
-                categoryType: fromType,
-                expenseType: "transfer",
-                date
             };
-            
-            jsonData.transaksi.unshift(transaksi);
-            
-            const transferTo = {
-                title: `Transfer dari ${fromCat} ke ${toCat}`,
-                amount: amount,
-                category: toCat,
-                categoryType: toType,
-                expenseType: "transfer",
-                date
-            };
-            
-            jsonData.transaksi.unshift(transferTo);
-            
-            if (!data[fromType]) data[fromType] = {};
-            if (!data[fromType][fromCat]) data[fromType][fromCat] = 0;
-            data[fromType][fromCat] -= amount;
-            
-            if (!data[toType]) data[toType] = {};
-            if (!data[toType][toCat]) data[toType][toCat] = 0;
-            data[toType][toCat] += amount;
-            
-        } else {
-            const [categoryType, category] = document.getElementById('category').value.split('|');
-            const expenseType = document.getElementById('expenseType').value;
-            
-            transaksi = { 
-                title, 
-                amount: type === '-' ? -amount : amount, 
-                category, 
-                categoryType, 
-                expenseType, 
-                date 
-            };
-            
-            if (!data[categoryType]) data[categoryType] = {};
-            if (!data[categoryType][category]) data[categoryType][category] = 0;
-            data[categoryType][category] += transaksi.amount;
-            
-            if (data[categoryType][category] < 0) showToast(`Saldo ${category} negatif: Rp${data[categoryType][category].toLocaleString()}`);
-            if (data[categoryType][category] === 0) delete data[categoryType][category];
-            
-            jsonData.transaksi.unshift(transaksi);
+            reader.readAsText(file);
         }
 
-        jsonData.assets = data;
-        await saveData();
-        showToast(`Transaksi "${title}" disimpan`);
-        form.reset();
-        refreshAll();
-    }
-
-    async function deleteTransaction(filteredIndex) {
-        await loadData();
-        const filter = document.getElementById('historyFilter').value;
-        const startDateInput = document.getElementById('startDate').value;
-        const endDateInput = document.getElementById('endDate').value;
-
-        function parseDate(dateStr) {
-            const parts = dateStr.split(' ');
-            if (parts.length !== 3) return null;
-            const monthNames = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
-            const day = parseInt(parts[0], 10);
-            const month = monthNames.indexOf(parts[1].toLowerCase());
-            const year = parseInt(parts[2], 10);
-            if (month === -1 || isNaN(day) || isNaN(year)) return null;
-            return new Date(year, month, day);
+        function updateChart() {
+            const month = parseInt(document.getElementById('monthSelect').value);
+            const year = parseInt(document.getElementById('yearSelect').value);
+            createAssetChart(month, year);
         }
 
-        let filteredHistory = history.filter(item => {
-            const matchesCategory = filter === 'all' ||
-                (filter === 'Tunai' && item.categoryType === 'Uang Tunai') ||
-                (filter === 'Bank 1' && item.category === 'Bank 1') ||
-                (filter === 'Bank 2' && item.category === 'Bank 2') ||
-                item.expenseType === filter;
-            return matchesCategory;
-        });
-
-        if (startDateInput && endDateInput) {
-            const startDate = new Date(startDateInput + '-01');
-            const endDate = new Date(endDateInput + '-01');
-            endDate.setMonth(endDate.getMonth() + 1);
-            endDate.setDate(endDate.getDate() - 1);
-
-            filteredHistory = filteredHistory.filter(item => {
-                const itemDate = parseDate(item.date);
-                return itemDate >= startDate && itemDate <= endDate && !isNaN(itemDate.getTime());
-            });
-        }
-
-        const transaksi = filteredHistory[filteredIndex];
-        if (!transaksi) return showToast('Transaksi tidak ditemukan');
-
-        const originalIndex = history.findIndex(item =>
-            item.title === transaksi.title &&
-            item.amount === transaksi.amount &&
-            item.date === transaksi.date &&
-            item.category === transaksi.category &&
-            item.expenseType === transaksi.expenseType
-        );
-
-        if (originalIndex === -1) return showToast('Transaksi tidak ditemukan di riwayat asli');
-
-        if (transaksi.expenseType === 'transfer') {
-            jsonData.transaksi.splice(originalIndex, 1);
-            const matchingIndex = jsonData.transaksi.findIndex(t =>
-                t.title === transaksi.title &&
-                t.amount === -transaksi.amount &&
-                t.expenseType === 'transfer'
-            );
-            if (matchingIndex !== -1) jsonData.transaksi.splice(matchingIndex, 1);
-        } else {
-            if (transaksi.categoryType && transaksi.category) {
-                data[transaksi.categoryType][transaksi.category] -= transaksi.amount;
-                if (data[transaksi.categoryType][transaksi.category] === 0) {
-                    delete data[transaksi.categoryType][transaksi.category];
-                }
-            }
-            jsonData.transaksi.splice(originalIndex, 1);
-        }
-
-        jsonData.assets = data;
-        await saveData();
-        showToast(`Transaksi "${transaksi.title}" dihapus`);
-        refreshAll();
-    }
-
-    function evaluateExpense(item) {
-        let necessity = 3, efficiency = 3, goalAlignment = 3, frequency = 3;
-        if (item.amount < 0) {
-            switch (item.expenseType) {
-                case 'kebutuhan_dasar': necessity = 5; efficiency = 4; goalAlignment = 5; frequency = 4; break;
-                case 'bisnis_usaha': necessity = 4; efficiency = 4; goalAlignment = 5; frequency = 3; break;
-                case 'investasi': necessity = 4; efficiency = 5; goalAlignment = 5; frequency = 2; break;
-                case 'gaya_hidup': necessity = 2; efficiency = 3; goalAlignment = 2; frequency = 3; break;
-                case 'lain_lain': necessity = 3; efficiency = 3; goalAlignment = 3; frequency = 3; break;
-                case 'transfer': necessity = 4; efficiency = 5; goalAlignment = 5; frequency = 3; break;
-            }
-            efficiency = Math.abs(item.amount) > 1000000 ? 2 : Math.abs(item.amount) > 500000 ? 3 : 4;
-        } else {
-            necessity = 5; efficiency = 5; goalAlignment = 5; frequency = 4;
-        }
-        const score = (necessity + efficiency + goalAlignment + frequency) / 4;
-        return { score: score.toFixed(2), necessity, efficiency, goalAlignment, frequency };
-    }
-
-    function getSuggestion(score) {
-        if (score >= 4.5) return "Sangat baik! Pertahankan.";
-        if (score >= 4) return "Baik, bisa lebih optimal.";
-        if (score >= 3) return "Cukup, pertimbangkan alternatif.";
-        return "Perlu evaluasi ulang.";
-    }
-
-    async function checkAssetLimit() {
-        await loadData();
-        const startDateInput = document.getElementById('startDate').value;
-        const endDateInput = document.getElementById('endDate').value;
-
-        function parseDate(dateStr) {
-            const parts = dateStr.split(' ');
-            if (parts.length !== 3) return null;
-            const monthNames = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
-            const day = parseInt(parts[0], 10);
-            const month = monthNames.indexOf(parts[1].toLowerCase());
-            const year = parseInt(parts[2], 10);
-            if (month === -1 || isNaN(day) || isNaN(year)) return null;
-            return new Date(year, month, day);
-        }
-
-        let filteredExpenses = jsonData.transaksi.filter(item => item.amount < 0);
-        let filteredLifestyleExpenses = jsonData.transaksi.filter(item => item.expenseType === 'gaya_hidup' && item.amount < 0);
-
-        if (startDateInput && endDateInput) {
-            const startDate = new Date(startDateInput + '-01');
-            const endDate = new Date(endDateInput + '-01');
-            endDate.setMonth(endDate.getMonth() + 1);
-            endDate.setDate(endDate.getDate() - 1);
-
-            filteredExpenses = filteredExpenses.filter(item => {
-                const itemDate = parseDate(item.date);
-                return itemDate >= startDate && itemDate <= endDate && !isNaN(itemDate.getTime());
-            });
-
-            filteredLifestyleExpenses = filteredLifestyleExpenses.filter(item => {
-                const itemDate = parseDate(item.date);
-                return itemDate >= startDate && itemDate <= endDate && !isNaN(itemDate.getTime());
-            });
-        }
-
-        const totalAssets = Object.values(data).reduce((sum, cat) => sum + Object.values(cat).reduce((sum, val) => sum + (parseFloat(val) || 0), 0), 0);
-        const totalExpenses = filteredExpenses.reduce((sum, item) => sum + Math.abs(item.amount), 0);
-        const lifestyleExpenses = filteredLifestyleExpenses.reduce((sum, item) => sum + Math.abs(item.amount), 0);
-        const monthlyIncome = 4700000;
-
-        let warnings = [];
-        if (totalExpenses > totalAssets) warnings.push(`Pengeluaran (Rp${totalExpenses.toLocaleString()}) > aset (Rp${totalAssets.toLocaleString()})`);
-        if (lifestyleExpenses > monthlyIncome * 0.3) warnings.push(`Gaya hidup (Rp${lifestyleExpenses.toLocaleString()}) > 30% pendapatan (Rp${(monthlyIncome * 0.3).toLocaleString()})`);
-
-        warningDiv.innerHTML = warnings.length ? `<strong>Peringatan:</strong> ${warnings.join(' ')}` : '';
-        warningDiv.style.display = warnings.length ? 'block' : 'none';
-    }
-
-    function evaluateExpenses() {
-        const monthlyIncome = 4700000;
-        const startDateInput = document.getElementById('startDate').value;
-        const endDateInput = document.getElementById('endDate').value;
-		
-		function parseDate(dateStr) {
-			const parts = dateStr.split(' ');
-			if (parts.length !== 3) {
-				console.warn(`Invalid date format: ${dateStr}`);
-				return null;
-			}
-			const monthNames = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
-			const day = parseInt(parts[0], 10);
-			const month = monthNames.indexOf(parts[1].toLowerCase());
-			const year = parseInt(parts[2], 10);
-			if (month === -1 || isNaN(day) || isNaN(year)) {
-				console.warn(`Failed to parse date: ${dateStr}`);
-				return null;
-			}
-			return new Date(year, month, day);
-		}
-
-        let nonTransferHistory = history.filter(item => item.expenseType !== 'transfer');
-        if (startDateInput && endDateInput) {
-            const startDate = new Date(startDateInput + '-01');
-            const endDate = new Date(endDateInput + '-01');
-            endDate.setMonth(endDate.getMonth() + 1);
-            endDate.setDate(endDate.getDate() - 1);
-
-            nonTransferHistory = nonTransferHistory.filter(item => {
-                const itemDate = parseDate(item.date);
-                return itemDate >= startDate && itemDate <= endDate && !isNaN(itemDate.getTime());
-            });
-        }
-
-        const totalExpenses = nonTransferHistory
-            .filter(item => item.amount < 0)
-            .reduce((sum, item) => sum + Math.abs(item.amount), 0);
-            
-        const expenseByType = {};
-        const expenseTypes = ['kebutuhan_dasar', 'bisnis_usaha', 'investasi', 'gaya_hidup', 'lain_lain'];
-        
-        expenseTypes.forEach(type => 
-            expenseByType[type] = nonTransferHistory
-                .filter(item => item.expenseType === type && item.amount < 0)
-                .reduce((sum, item) => sum + Math.abs(item.amount), 0)
-        );
-
-        const idealPercentages = { 
-            'kebutuhan_dasar': 45, 
-            'bisnis_usaha': 20, 
-            'investasi': 20, 
-            'gaya_hidup': 5, 
-            'lain_lain': 10
-        };
-        
-        let analysis = `<h3>Analisis Pengeluaran (Non-Transfer) ${startDateInput && endDateInput ? startDateInput + ' - ' + endDateInput : 'Semua Waktu'}</h3><p><strong>Total:</strong> Rp${totalExpenses.toLocaleString()}</p><ul>`;
-        expenseTypes.forEach(type => {
-            const percentage = totalExpenses ? (expenseByType[type] / totalExpenses * 100).toFixed(1) : 0;
-            const ideal = idealPercentages[type] || 0;
-            const typeName = {
-                'kebutuhan_dasar': 'Kebutuhan Dasar',
-                'bisnis_usaha': 'Bisnis usaha',
-                'investasi': 'Investasi',
-                'gaya_hidup': 'Gaya Hidup',
-                'lain_lain': 'Lain-lain'
-            }[type] || type;
-            const color = type === 'gaya_hidup' && percentage > 5 ? '#dc3545' :
-						 (type === 'kebutuhan_dasar' && percentage > 45) ||
-					  	 (type === 'bisnis_usaha' && percentage > 20) ||
-						 (type === 'investasi' && percentage > 20) ? '#28a745' : 'inherit';
-        
-			analysis += `<li style="color: ${color}">${typeName}: Rp${expenseByType[type].toLocaleString()} (${percentage}%) - ${percentage > ideal ? 'melebihi' : 'di bawah'} ${ideal}%</li>`;
-        });
-        analysis += `</ul>`;
-
-        const needs = expenseByType['kebutuhan_dasar'] + (expenseByType['bisnis_usaha'] * 0.5);
-        const wants = expenseByType['gaya_hidup'] + (expenseByType['bisnis_usaha'] * 0.5);
-        const savings = expenseByType['investasi'];
-        const needsPercentage = totalExpenses ? (needs / totalExpenses * 100).toFixed(1) : 0;
-        const wantsPercentage = totalExpenses ? (wants / totalExpenses * 100).toFixed(1) : 0;
-        const savingsPercentage = totalExpenses ? (savings / totalExpenses * 100).toFixed(1) : 0;
-
-        analysis += `<h4>Metode 50:30:20</h4><ul>`;
-        analysis += `<li>Kebutuhan (50%): Rp${needs.toLocaleString()} (${needsPercentage}%) - ${needsPercentage > 50 ? 'Melebihi' : 'Di bawah'}</li>`;
-        analysis += `<li>Keinginan (30%): Rp${wants.toLocaleString()} (${wantsPercentage}%) - ${wantsPercentage > 30 ? 'Melebihi' : 'Di bawah'}</li>`;
-        analysis += `<li>Tabungan (20%): Rp${savings.toLocaleString()} (${savingsPercentage}%) - ${savingsPercentage > 20 ? 'Melebihi' : 'Di bawah'}</li></ul>`;
-
-        analysis += `<h4>Rekomendasi</h4><ul>`;
-        if (needsPercentage > 55) analysis += `<li>Kurangi pengeluaran kebutuhan dasar.</li>`;
-        if (wantsPercentage > 35) analysis += `<li>Kurangi pengeluaran gaya hidup.</li>`;
-        if (savingsPercentage < 15) analysis += `<li>Tingkatkan tabungan/investasi.</li>`;
-        analysis += totalExpenses > monthlyIncome ? `<li>Pengeluaran melebihi pendapatan!</li>` : `<li>Pengeluaran terkendali.</li>`;
-        analysis += `</ul>`;
-
-        analysis += evaluateTransfers();
-
-        expenseEvaluationDiv.innerHTML = analysis;
-    }
-
-    function filterHistory() {
-		const filter = document.getElementById('historyFilter').value;
-		const startDateInput = document.getElementById('startDate').value;
-		const endDateInput = document.getElementById('endDate').value;
-
-		console.log('Filter dipilih:', filter);
-		console.log('Semua transaksi:', history);
-
-		historyList.innerHTML = '';
-
-		function parseDate(dateStr) {
-			console.log('Parsing date:', dateStr);
-			const parts = dateStr.split(' ');
-			if (parts.length !== 3) {
-				console.warn(`Invalid date format: ${dateStr}`);
-				return null;
-			}
-			const monthNames = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
-			const day = parseInt(parts[0], 10);
-			const month = monthNames.indexOf(parts[1].toLowerCase());
-			const year = parseInt(parts[2], 10);
-			if (month === -1 || isNaN(day) || isNaN(year)) {
-				console.warn(`Failed to parse date: ${dateStr}`);
-				return null;
-			}
-			return new Date(year, month, day);
-		}
-
-		let filteredHistory = history.filter(item => {
-			const matchesCategory = filter === 'all' ||
-				(filter === 'Tunai' && item.categoryType === 'Tunai') ||
-				(filter === 'Bank 1' && (item.category === 'Bank 1' || item.category === 'Rek Bank 1')) ||
-				(filter === 'Bank 2' && item.category === 'Bank 2') ||
-				item.expenseType === filter;
-			return matchesCategory;
-		});
-
-		console.log('Transaksi setelah filter kategori:', filteredHistory);
-
-		if (startDateInput && endDateInput) {
-			const startDate = new Date(startDateInput + '-01T00:00:00');
-			const endDate = new Date(endDateInput + '-01T23:59:59');
-			endDate.setMonth(endDate.getMonth() + 1);
-			endDate.setDate(0);
-
-			filteredHistory = filteredHistory.filter(item => {
-				const itemDate = parseDate(item.date);
-				if (!itemDate || isNaN(itemDate.getTime())) {
-					console.warn(`Invalid transaction date: ${item.date}`);
-					return false;
-				}
-				return itemDate >= startDate && itemDate <= endDate;
-			});
-
-			console.log('Transaksi setelah filter tanggal:', filteredHistory);
-		}
-
-		if (filteredHistory.length === 0) {
-			historyList.innerHTML = '<li>Tidak ada transaksi yang sesuai dengan filter.</li>';
-		} else {
-			filteredHistory.forEach((item, index) => {
-				const evaluation = evaluateExpense(item);
-				const li = document.createElement('li');
-				li.innerHTML = `
-					<div class="transaction-header">
-						<div class="transaction-title">${item.title}</div>
-						<div class="transaction-amount ${item.amount < 0 ? 'minus' : 'plus'}">${item.amount < 0 ? '-' : '+'}Rp${Math.abs(item.amount).toLocaleString()}</div>
-					</div>
-					<div class="transaction-details">
-						<div>${item.date}</div>
-						<div>${item.category} (${item.categoryType})</div>
-						<div>${item.expenseType}</div>
-					</div>
-					<div class="evaluation">
-						<strong>Penilaian:</strong> Skor ${evaluation.score}/5<br>
-						<strong>Detail:</strong> Kepentingan ${evaluation.necessity}, Efisiensi ${evaluation.efficiency}, 
-						Dampak ${evaluation.goalAlignment}, Frekuensi ${evaluation.frequency}<br>
-						<strong>Saran:</strong> ${getSuggestion(evaluation.score)}
-					</div>
-					<button class="delete-btn" onclick="deleteTransaction(${index})">Hapus</button>
-				`;
-				historyList.appendChild(li);
-			});
-		}
-
-		createExpenseChart();
-		evaluateExpenses();
-	}
-	
-	// New function to update transaction dropdowns
-	function updateTransactionDropdowns() {
-		const categorySelect = document.getElementById('category');
-		const fromAccountSelect = document.getElementById('fromAccount');
-		const toAccountSelect = document.getElementById('toAccount');
-
-		// Clear existing options
-		categorySelect.innerHTML = '';
-		fromAccountSelect.innerHTML = '';
-		toAccountSelect.innerHTML = '';
-
-		// Get all cash assets from the Tunai category
-		const cashAssets = data['Tunai'] ? Object.keys(data['Tunai']) : [];
-
-		// Add default options if no cash assets exist
-		if (cashAssets.length === 0) {
-			const defaultOptions = [
-				{ value: 'Tunai|Bank 1', text: 'Bank 1' },
-				{ value: 'Tunai|Bank 2', text: 'Bank 2' },
-				{ value: 'Tunai|Uang Tunai', text: 'Uang Tunai' }
-			];
-			defaultOptions.forEach(opt => {
-				categorySelect.add(new Option(opt.text, opt.value));
-				fromAccountSelect.add(new Option(opt.text, opt.value));
-				toAccountSelect.add(new Option(opt.text, opt.value));
-			});
-		} else {
-			// Populate dropdowns with cash assets
-			cashAssets.forEach(asset => {
-				const value = `Tunai|${asset}`;
-				const text = asset;
-				categorySelect.add(new Option(text, value));
-				fromAccountSelect.add(new Option(text, value));
-				toAccountSelect.add(new Option(text, value));
-			});
-		}
-	}
-
-    function refreshChart() {
-        const switchCategoryBtn = document.getElementById('switchCategoryBtn');
-        const legendToggleBtn = document.getElementById('legendToggleBtn');
-
-        if (pieChart) pieChart.destroy();
-        if (heatmapChart) heatmapChart.destroy();
-
-        if (chartMode === 'pie') {
-            switchCategoryBtn.style.display = 'block';
-            legendToggleBtn.style.display = 'block';
-            document.getElementById('pieChart').style.display = 'block';
-            document.getElementById('heatmapChart').style.display = 'none';
-            document.getElementById('chartToggle').textContent = '📈 Tampilkan Heatmap Antar-Kategori';
-            pieChart = new Chart(pieChartCanvas, createPieChartData(categories[current]));
-        } else if (chartMode === 'heatmap-all') {
-            switchCategoryBtn.style.display = 'none';
-            legendToggleBtn.style.display = 'none';
-            document.getElementById('pieChart').style.display = 'none';
-            document.getElementById('heatmapChart').style.display = 'block';
-            document.getElementById('chartToggle').textContent = '📊 Tampilkan Heatmap per Kategori';
-            totalValueDiv.textContent = '';
-            heatmapChart = new Chart(heatmapChartCanvas, createHeatmapData("Semua Aset"));
-        } else if (chartMode === 'heatmap-category') {
-            switchCategoryBtn.style.display = 'block';
-            legendToggleBtn.style.display = 'none';
-            document.getElementById('pieChart').style.display = 'none';
-            document.getElementById('heatmapChart').style.display = 'block';
-            document.getElementById('chartToggle').textContent = '🥧 Tampilkan Pie Chart';
-            heatmapChart = new Chart(heatmapChartCanvas, createHeatmapData(categories[current]));
-        }
-    }
-
-    function toggleChart() {
-        chartMode = chartMode === 'pie' ? 'heatmap-all' : chartMode === 'heatmap-all' ? 'heatmap-category' : 'pie';
-        refreshChart();
-    }
-
-    function switchCategory() {
-        current = (current + 1) % categories.length;
-        refreshChart();
-    }
-
-    function toggleLegend() {
-        if (chartMode === 'pie') {
-            showLegend = !showLegend;
-            refreshChart();
-        }
-    }
-
-    function updateAllDropdowns() {
-		const editSel = document.getElementById('editItemSelect');
-		const delSel = document.getElementById('deleteItemSelect');
-		editSel.innerHTML = '';
-		delSel.innerHTML = '';
-		for (let cat of categories) {
-			if (cat === "Semua Aset") continue;
-			for (let item in data[cat]) {
-				const label = `${item} (${cat}) - Rp${data[cat][item].toLocaleString()}`;
-				const value = `${item}|||${cat}`;
-				editSel.add(new Option(label, value));
-				delSel.add(new Option(label, value));
-			}
-		}
-		fillEditValue();
-		updateTransactionDropdowns(); // Update transaction dropdowns <--- Baris yang ditambahkan
-	}
-
-    function fillEditValue() {
-        const sel = document.getElementById('editItemSelect');
-        if (!sel.value) return;
-        const [name, cat] = sel.value.split('|||');
-        document.getElementById('editItemValue').value = data[cat][name];
-    }
-
-    function refreshAll() {
-        filterHistory();
-        checkAssetLimit();
-        createExpenseChart();
-        evaluateExpenses();
-        refreshChart();
-        updateAllDropdowns();
-        evaluateAssets();
-    }
-
-    form.addEventListener('submit', async e => {
-        e.preventDefault();
-        await addTransaction();
-    });
-
-    loadData().then(() => {
+        // Inisialisasi
         if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
-        refreshAll();
-    });
-</script>
+        updateYearDropdown();
+        createAssetChart(6, 2025); // Default: Juni 2025
+    </script>
 </body>
 </html>
