@@ -393,7 +393,7 @@
                 <div class="section">
                     <h3>➕ Tambah Item</h3>
                     <input type="text" id="itemName" placeholder="Nama item">
-                    <input type="number" id="itemValue" placeholder="Nilai (Rp)" min="0" max="100000000">
+                    <input type="text" id="itemValue" placeholder="Nilai (Rp)" min="0" max="100000000" oninput="formatNumber(this)">
                     <select id="itemCategory">
                         <option value="Investasi">Investasi</option>
                         <option value="Aset Konsumtif">Aset Konsumtif</option>
@@ -404,7 +404,7 @@
                 <div class="section">
                     <h3>✏️ Edit Item</h3>
                     <select id="editItemSelect" onchange="fillEditValue()"></select>
-                    <input type="number" id="editItemValue" placeholder="Harga baru" min="0" max="100000000">
+                    <input type="text" id="editItemValue" placeholder="Harga baru" min="0" max="100000000" oninput="formatNumber(this)">
                     <button onclick="updateItem()">Update Nilai</button>
                 </div>
                 <div class="section">
@@ -423,53 +423,56 @@
                 <div>
                     <h3>➕ Input Transaksi</h3>
                     <form id="expenseForm">
-                        <input type="text" id="title" required placeholder="Nama Aktivitas">
-                        <input type="number" id="amount" required placeholder="Jumlah (Rp)" min="1" max="100000000">
-                        <select id="transactionType" onchange="toggleSpecialSections()" required>
-                            <option value="normal">Transaksi Normal</option>
-                            <option value="transfer">Transfer Antar Akun</option>
-                        </select>
-                        
-                        <!-- Transfer Section -->
-                        <div class="transfer-section" id="transferSection">
-                            <div>
-                                <label>Dari:</label>
-                                <select id="fromAccount">
-                                    <option value="Tunai|Bank 1">Bank 1</option>
-                                    <option value="Tunai|Bank 2">Bank 2</option>
-                                    <option value="Tunai|Uang Tunai">Uang Tunai</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label>Ke:</label>
-                                <select id="toAccount">
-                                    <option value="Tunai|Bank 1">Bank 1</option>
-                                    <option value="Tunai|Bank 2">Bank 2</option>
-                                    <option value="Tunai|Uang Tunai">Uang Tunai</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <select id="category" required>
-                            <option value="Tunai|Bank 1">Bank 1</option>
-                            <option value="Tunai|Bank 2">Bank 2</option>
-                            <option value="Tunai|Uang Tunai">Uang Tunai</option>
-                        </select>
-                        <select id="expenseType" onchange="toggleBisnisusahaNote(), toggleLainLainNote()" required>
-                            <option value="kebutuhan_dasar">Kebutuhan Dasar</option>
-                            <option value="bisnis_usaha">Bisnis / Usaha</option>
-                            <option value="investasi">Investasi/Tabungan</option>
-                            <option value="gaya_hidup">Gaya Hidup</option>
-                            <option value="lain_lain">Lain-lain</option>
-                        </select>
+					<input type="text" id="title" required placeholder="Nama Aktivitas">
+					<input type="text" id="amount" required placeholder="Jumlah (Rp)" min="1" max="100000000" oninput="formatNumber(this)">
+					<select id="transactionType" onchange="toggleSpecialSections()" required>
+						<option value="normal">Transaksi Normal</option>
+						<option value="transfer">Transfer Antar Akun</option>
+					</select>
+					
+					<!-- Transfer Section -->
+					<div class="transfer-section" id="transferSection">
+						<div>
+							<label>Dari:</label>
+							<select id="fromAccount">
+								<option value="Tunai|Bank 1">Bank 1</option>
+								<option value="Tunai|Bank 2">Bank 2</option>
+								<option value="Tunai|Uang Tunai">Uang Tunai</option>
+							</select>
+						</div>
+						<div>
+							<label>Ke:</label>
+							<select id="toAccount">
+								<option value="Tunai|Bank 1">Bank 1</option>
+								<option value="Tunai|Bank 2">Bank 2</option>
+								<option value="Tunai|Uang Tunai">Uang Tunai</option>
+							</select>
+						</div>
+					</div>
+					
+					<!-- Non-Transfer Section -->
+					<div id="nonTransferSection">
+						<select id="category" required>
+							<option value="Tunai|Bank 1">Bank 1</option>
+							<option value="Tunai|Bank 2">Bank 2</option>
+							<option value="Tunai|Uang Tunai">Uang Tunai</option>
+						</select>
+						<select id="expenseType" onchange="toggleBisnisusahaNote(), toggleLainLainNote()" required>
+							<option value="kebutuhan_dasar">Kebutuhan Dasar</option>
+							<option value="bisnis_usaha">Bisnis / Usaha</option>
+							<option value="investasi">Investasi/Tabungan</option>
+							<option value="gaya_hidup">Gaya Hidup</option>
+							<option value="lain_lain">Lain-lain</option>
+						</select>
 						<p id="BisnisusahaNote" class="form-note">*Catatan* Bisnis usaha untuk pengeluaran usaha Energy; bisnis energi hijau (panel surya, scc, inverter, dll).</p>
 						<p id="LainLainNote" class="form-note">*Catatan* Lain-lain merupakan kategori diluar kategori utama seperti hadiah, pajak, sumbangan atau kebutuhan darurat dll).</p>
-                        <select id="type" required>
-                            <option value="-">Pengeluaran (-)</option>
-                            <option value="+">Pemasukan (+)</option>
-                        </select>
-                        <button type="submit">💾 Simpan Transaksi</button>
-                    </form>
+						<select id="type" required>
+							<option value="-">Pengeluaran (-)</option>
+							<option value="+">Pemasukan (+)</option>
+						</select>
+					</div>
+					<button type="submit">💾 Simpan Transaksi</button>
+				</form>
 
                     <h3>📜 Riwayat Transaksi</h3>
                     <select id="historyFilter" onchange="filterHistory()">
@@ -515,6 +518,24 @@
     </div>
 
     <script>
+	// Fungsi untuk memformat angka dengan titik setiap tiga digit
+	function formatNumber(input) {
+		// Ambil nilai input dan hapus semua karakter non-digit
+		let value = input.value.replace(/\D/g, '');
+		
+		// Jika kosong, kembalikan
+		if (!value) {
+			input.value = '';
+			return;
+		}
+		
+		// Konversi ke angka dan format dengan titik
+		value = parseInt(value).toLocaleString('id-ID', { minimumFractionDigits: 0 });
+		
+		// Set nilai input ke format dengan titik
+		input.value = value;
+	}
+	
     const jsonData = {
         assets: {},
         transaksi: []
@@ -540,9 +561,23 @@
     const transferSection = document.getElementById("transferSection");
 
     function toggleSpecialSections() {
-        const type = document.getElementById("transactionType").value;
-        transferSection.style.display = type === "transfer" ? "grid" : "none";
-    }
+		const type = document.getElementById("transactionType").value;
+		const transferSection = document.getElementById("transferSection");
+		const nonTransferSection = document.getElementById("nonTransferSection");
+		
+		transferSection.style.display = type === "transfer" ? "grid" : "none";
+		nonTransferSection.style.display = type === "transfer" ? "none" : "block";
+		
+		// Ensure notes are hidden/shown based on expenseType when switching back to normal
+		if (type === "normal") {
+			toggleBisnisusahaNote();
+			toggleLainLainNote();
+		} else {
+			// Hide notes when in transfer mode
+			document.getElementById('BisnisusahaNote').style.display = 'none';
+			document.getElementById('LainLainNote').style.display = 'none';
+		}
+	}
 
     function showToast(message) {
         const toast = document.getElementById('toast');
@@ -1164,83 +1199,84 @@
 
 
     async function addTransaction() {
-        const transactionType = document.getElementById('transactionType').value;
-        const title = capitalizeWords(document.getElementById('title').value.trim());
-        const amount = parseInt(document.getElementById('amount').value);
-        const type = document.getElementById('type').value;
-        const date = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+		const transactionType = document.getElementById('transactionType').value;
+		const title = capitalizeWords(document.getElementById('title').value.trim());
+		// Hapus titik dari input amount dan konversi ke integer
+		const amount = parseInt(document.getElementById('amount').value.replace(/\./g, ''));
+		const type = document.getElementById('type').value;
+		const date = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
 
-        if (!title || isNaN(amount) || amount <= 0) return showToast("Isi semua field dengan nilai valid");
+		if (!title || isNaN(amount) || amount <= 0) return showToast("Isi semua field dengan nilai valid");
 
-        await loadData();
-        let transaksi = { title, amount: type === '-' ? -amount : amount, date };
-        
-        if (transactionType === "transfer") {
-            const fromAccount = document.getElementById('fromAccount').value;
-            const toAccount = document.getElementById('toAccount').value;
-            
-            const [fromType, fromCat] = fromAccount.split('|');
-            const [toType, toCat] = toAccount.split('|');
-            
-            transaksi = {
-                title: `Transfer dari ${fromCat} ke ${toCat}`,
-                amount: -amount,
-                category: fromCat,
-                categoryType: fromType,
-                expenseType: "transfer",
-                date
-            };
-            
-            jsonData.transaksi.unshift(transaksi);
-            
-            const transferTo = {
-                title: `Transfer dari ${fromCat} ke ${toCat}`,
-                amount: amount,
-                category: toCat,
-                categoryType: toType,
-                expenseType: "transfer",
-                date
-            };
-            
-            jsonData.transaksi.unshift(transferTo);
-            
-            if (!data[fromType]) data[fromType] = {};
-            if (!data[fromType][fromCat]) data[fromType][fromCat] = 0;
-            data[fromType][fromCat] -= amount;
-            
-            if (!data[toType]) data[toType] = {};
-            if (!data[toType][toCat]) data[toType][toCat] = 0;
-            data[toType][toCat] += amount;
-            
-        } else {
-            const [categoryType, category] = document.getElementById('category').value.split('|');
-            const expenseType = document.getElementById('expenseType').value;
-            
-            transaksi = { 
-                title, 
-                amount: type === '-' ? -amount : amount, 
-                category, 
-                categoryType, 
-                expenseType, 
-                date 
-            };
-            
-            if (!data[categoryType]) data[categoryType] = {};
-            if (!data[categoryType][category]) data[categoryType][category] = 0;
-            data[categoryType][category] += transaksi.amount;
-            
-            if (data[categoryType][category] < 0) showToast(`Saldo ${category} negatif: Rp${data[categoryType][category].toLocaleString()}`);
-            if (data[categoryType][category] === 0) delete data[categoryType][category];
-            
-            jsonData.transaksi.unshift(transaksi);
-        }
+		await loadData();
+		let transaksi = { title, amount: type === '-' ? -amount : amount, date };
+		
+		if (transactionType === "transfer") {
+			const fromAccount = document.getElementById('fromAccount').value;
+			const toAccount = document.getElementById('toAccount').value;
+			
+			const [fromType, fromCat] = fromAccount.split('|');
+			const [toType, toCat] = toAccount.split('|');
+			
+			transaksi = {
+				title: `Transfer dari ${fromCat} ke ${toCat}`,
+				amount: -amount,
+				category: fromCat,
+				categoryType: fromType,
+				expenseType: "transfer",
+				date
+			};
+			
+			jsonData.transaksi.unshift(transaksi);
+			
+			const transferTo = {
+				title: `Transfer dari ${fromCat} ke ${toCat}`,
+				amount: amount,
+				category: toCat,
+				categoryType: toType,
+				expenseType: "transfer",
+				date
+			};
+			
+			jsonData.transaksi.unshift(transferTo);
+			
+			if (!data[fromType]) data[fromType] = {};
+			if (!data[fromType][fromCat]) data[fromType][fromCat] = 0;
+			data[fromType][fromCat] -= amount;
+			
+			if (!data[toType]) data[toType] = {};
+			if (!data[toType][toCat]) data[toType][toCat] = 0;
+			data[toType][toCat] += amount;
+			
+		} else {
+			const [categoryType, category] = document.getElementById('category').value.split('|');
+			const expenseType = document.getElementById('expenseType').value;
+			
+			transaksi = { 
+				title, 
+				amount: type === '-' ? -amount : amount, 
+				category, 
+				categoryType, 
+				expenseType, 
+				date 
+			};
+			
+			if (!data[categoryType]) data[categoryType] = {};
+			if (!data[categoryType][category]) data[categoryType][category] = 0;
+			data[categoryType][category] += transaksi.amount;
+			
+			if (data[categoryType][category] < 0) showToast(`Saldo ${category} negatif: Rp${data[categoryType][category].toLocaleString()}`);
+			if (data[categoryType][category] === 0) delete data[categoryType][category];
+			
+			jsonData.transaksi.unshift(transaksi);
+		}
 
-        jsonData.assets = data;
-        await saveData();
-        showToast(`Transaksi "${title}" disimpan`);
-        form.reset();
-        refreshAll();
-    }
+		jsonData.assets = data;
+		await saveData();
+		showToast(`Transaksi "${title}" disimpan`);
+		form.reset();
+		refreshAll();
+	}
 
     async function deleteTransaction(filteredIndex) {
         await loadData();
@@ -1592,26 +1628,38 @@
 		fromAccountSelect.innerHTML = '';
 		toAccountSelect.innerHTML = '';
 
-		// Get all cash assets from the Tunai category
+		// Get assets from both Tunai and Investasi categories
 		const cashAssets = data['Tunai'] ? Object.keys(data['Tunai']) : [];
+		const investmentAssets = data['Investasi'] ? Object.keys(data['Investasi']) : [];
+		
+		// Default options if no assets exist
+		const defaultOptions = [
+			{ value: 'Tunai|Bank 1', text: 'Bank 1' },
+			{ value: 'Tunai|Bank 2', text: 'Bank 2' },
+			{ value: 'Tunai|Uang Tunai', text: 'Uang Tunai' }
+		];
 
 		// Add default options if no cash assets exist
-		if (cashAssets.length === 0) {
-			const defaultOptions = [
-				{ value: 'Tunai|Bank 1', text: 'Bank 1' },
-				{ value: 'Tunai|Bank 2', text: 'Bank 2' },
-				{ value: 'Tunai|Uang Tunai', text: 'Uang Tunai' }
-			];
+		if (cashAssets.length === 0 && investmentAssets.length === 0) {
 			defaultOptions.forEach(opt => {
 				categorySelect.add(new Option(opt.text, opt.value));
 				fromAccountSelect.add(new Option(opt.text, opt.value));
 				toAccountSelect.add(new Option(opt.text, opt.value));
 			});
 		} else {
-			// Populate dropdowns with cash assets
+			// Add Tunai assets
 			cashAssets.forEach(asset => {
 				const value = `Tunai|${asset}`;
-				const text = asset;
+				const text = `${asset} (Tunai)`;
+				categorySelect.add(new Option(text, value));
+				fromAccountSelect.add(new Option(text, value));
+				toAccountSelect.add(new Option(text, value));
+			});
+
+			// Add Investasi assets
+			investmentAssets.forEach(asset => {
+				const value = `Investasi|${asset}`;
+				const text = `${asset} (Investasi)`;
 				categorySelect.add(new Option(text, value));
 				fromAccountSelect.add(new Option(text, value));
 				toAccountSelect.add(new Option(text, value));
@@ -1817,94 +1865,116 @@
 	}
 
 	function getExpenseDistribution(timeframe) {
-			const range = getTimeframeRange(timeframe);
-			let transaksi = jsonData.transaksi
-				.map(trans => ({ ...trans, parsedDate: parseDate(trans.date) }))
-				.filter(trans => trans.parsedDate && trans.amount < 0 && !trans.title.includes("Tf ") && !trans.title.includes("Transfer ") && trans.categoryType === "Tunai");
+		const range = getTimeframeRange(timeframe);
+		let transaksi = jsonData.transaksi
+			.map(trans => ({ ...trans, parsedDate: parseDate(trans.date) }))
+			.filter(trans => trans.parsedDate && trans.amount < 0 && !trans.title.includes("Tf ") && !trans.title.includes("Transfer ") && trans.categoryType === "Tunai");
 
-			if (range) {
-				const { startDate, endDate } = range;
-				transaksi = transaksi.filter(trans => trans.parsedDate >= startDate && trans.parsedDate <= endDate);
-			}
-
-			const expenseTypes = ['kebutuhan_dasar', 'bisnis_usaha', 'investasi', 'gaya_hidup', 'lain_lain'];
-			const labels = [];
-			const datasets = expenseTypes.map((type, index) => ({
-				label: {
-					'kebutuhan_dasar': 'Kebutuhan Dasar',
-					'bisnis_usaha': 'Bisnis Usaha',
-					'investasi': 'Investasi',
-					'gaya_hidup': 'Gaya Hidup',
-					'lain_lain': 'Lain-lain'
-				}[type] || type,
-				data: [],
-				borderColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'][index],
-				backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'][index],
-				fill: false,
-				tension: 0.1
-			}));
-
-			if (transaksi.length === 0) {
-				return { labels, datasets, total: 0, hasData: false };
-			}
-
-			const dataPoints = new Set();
-			transaksi.forEach(trans => {
-				let dateStr;
-				if (timeframe === '1day') {
-					dateStr = trans.parsedDate.toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-				} else {
-					// Weekly labels for all other timeframes
-					const weekStart = new Date(trans.parsedDate);
-					weekStart.setHours(0, 0, 0, 0);
-					if (weekStart.getDay() !== 1) {
-						weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
-					}
-					const weekEnd = new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000);
-					dateStr = `${weekStart.toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} - ${weekEnd.toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`;
-				}
-				dataPoints.add(dateStr);
-			});
-
-			labels.push(...Array.from(dataPoints).sort((a, b) => {
-				if (timeframe === '1day') {
-					const dateA = parseDate(a);
-					const dateB = parseDate(b);
-					return dateA - dateB;
-				} else {
-					const [startA] = a.split(' - ').map(parseDate);
-					const [startB] = b.split(' - ').map(parseDate);
-					return startA - startB;
-				}
-			}));
-
-			datasets.forEach(dataset => {
-				labels.forEach(() => dataset.data.push(0));
-			});
-
-			transaksi.forEach(trans => {
-				let dateStr;
-				if (timeframe === '1day') {
-					dateStr = trans.parsedDate.toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-				} else {
-					const weekStart = new Date(trans.parsedDate);
-					weekStart.setHours(0, 0, 0, 0);
-					if (weekStart.getDay() !== 1) {
-						weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
-					}
-					const weekEnd = new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000);
-					dateStr = `${weekStart.toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} - ${weekEnd.toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`;
-				}
-				const index = labels.indexOf(dateStr);
-				const typeIndex = expenseTypes.indexOf(trans.expenseType);
-				if (index !== -1 && typeIndex !== -1) {
-					datasets[typeIndex].data[index] += Math.abs(trans.amount);
-				}
-			});
-
-			const total = datasets.reduce((sum, dataset) => sum + dataset.data.reduce((a, b) => a + b, 0), 0);
-			return { labels, datasets, total, hasData: total > 0 };
+		if (range) {
+			const { startDate, endDate } = range;
+			transaksi = transaksi.filter(trans => trans.parsedDate >= startDate && trans.parsedDate <= endDate);
 		}
+
+		const expenseTypes = ['kebutuhan_dasar', 'bisnis_usaha', 'investasi', 'gaya_hidup', 'lain_lain'];
+		const labels = [];
+		const datasets = expenseTypes.map((type, index) => ({
+			label: {
+				'kebutuhan_dasar': 'Kebutuhan Dasar',
+				'bisnis_usaha': 'Bisnis Usaha',
+				'investasi': 'Investasi',
+				'gaya_hidup': 'Gaya Hidup',
+				'lain_lain': 'Lain-lain'
+			}[type] || type,
+			data: [],
+			borderColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'][index],
+			backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'][index],
+			fill: false,
+			tension: 0.1
+		}));
+
+		// Add dataset for average line
+		datasets.push({
+			label: 'Rata-rata',
+			data: [],
+			borderColor: '#666666', // Distinct color for average line
+			backgroundColor: '#666666',
+			fill: false,
+			tension: 0.1,
+			borderWidth: 2,
+			borderDash: [5, 5] // Dashed line for visual distinction
+		});
+
+		if (transaksi.length === 0) {
+			return { labels, datasets, total: 0, hasData: false };
+		}
+
+		const dataPoints = new Set();
+		transaksi.forEach(trans => {
+			let dateStr;
+			if (timeframe === '1day') {
+				dateStr = trans.parsedDate.toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+			} else {
+				const weekStart = new Date(trans.parsedDate);
+				weekStart.setHours(0, 0, 0, 0);
+				if (weekStart.getDay() !== 1) {
+					weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
+				}
+				const weekEnd = new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000);
+				dateStr = `${weekStart.toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} - ${weekEnd.toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+			}
+			dataPoints.add(dateStr);
+		});
+
+		labels.push(...Array.from(dataPoints).sort((a, b) => {
+			if (timeframe === '1day') {
+				const dateA = parseDate(a);
+				const dateB = parseDate(b);
+				return dateA - dateB;
+			} else {
+				const [startA] = a.split(' - ').map(parseDate);
+				const [startB] = b.split(' - ').map(parseDate);
+				return startA - startB;
+			}
+		}));
+
+		// Initialize data arrays for each dataset, including average
+		datasets.forEach(dataset => {
+			labels.forEach(() => dataset.data.push(0));
+		});
+
+		// Populate category data
+		transaksi.forEach(trans => {
+			let dateStr;
+			if (timeframe === '1day') {
+				dateStr = trans.parsedDate.toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+			} else {
+				const weekStart = new Date(trans.parsedDate);
+				weekStart.setHours(0, 0, 0, 0);
+				if (weekStart.getDay() !== 1) {
+					weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
+				}
+				const weekEnd = new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000);
+				dateStr = `${weekStart.toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} - ${weekEnd.toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+			}
+			const index = labels.indexOf(dateStr);
+			const typeIndex = expenseTypes.indexOf(trans.expenseType);
+			if (index !== -1 && typeIndex !== -1) {
+				datasets[typeIndex].data[index] += Math.abs(trans.amount);
+			}
+		});
+
+		// Calculate average for each label
+		const avgDataset = datasets[datasets.length - 1]; // Last dataset is average
+		labels.forEach((_, index) => {
+			const categorySums = datasets.slice(0, -1).map(dataset => dataset.data[index]);
+			const nonZeroCategories = categorySums.filter(sum => sum > 0).length;
+			const totalSum = categorySums.reduce((sum, val) => sum + val, 0);
+			avgDataset.data[index] = nonZeroCategories > 0 ? totalSum / nonZeroCategories : 0;
+		});
+
+		const total = datasets.slice(0, -1).reduce((sum, dataset) => sum + dataset.data.reduce((a, b) => a + b, 0), 0);
+		return { labels, datasets, total, hasData: total > 0 };
+	}
 
 	function createAllTimeAssetChart() {
 		const { dailyAssets, labels, hasData } = getAllTimeAssets('all-time');
