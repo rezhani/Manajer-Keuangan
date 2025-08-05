@@ -414,6 +414,12 @@
                 </div>
             </div>
             <div id="assetEvaluation" class="section"></div>
+				<!-- Edit MonthlyIncome -->		
+				<div style="margin-top: 1em;">
+					<label for="monthlyIncomeInput">Pendapatan Bulanan (Rp):</label>
+					<input type="text" id="monthlyIncomeInput" placeholder="Masukkan pendapatan bulanan" oninput="formatNumber(this)">
+					<button onclick="saveMonthlyIncome()" style="margin-top: 0.5em;">Simpan Pendapatan</button>
+				</div>
         </div>
 
         <!-- Keuangan Section -->
@@ -537,6 +543,7 @@
 	}
 	
     const jsonData = {
+		monthlyIncome: 4700000, // Nilai default
         assets: {"Tunai":{"Rek Bank 1":0,"Uang Tunai":0,"Rek Bank 2":0}
 		},
         transaksi: []
@@ -602,6 +609,22 @@
     function capitalizeWords(str) {
         return str.replace(/\b\w/g, char => char.toUpperCase());
     }
+	
+	// Fungsi untuk menyimpan pendapatan bulanan
+	async function saveMonthlyIncome() {
+		const input = document.getElementById('monthlyIncomeInput').value;
+		// Hapus titik dan konversi ke angka
+		const monthlyIncome = parseInt(input.replace(/\./g, ''));
+		if (isNaN(monthlyIncome)) {
+			showToast('Masukkan angka yang valid');
+			return;
+		}
+		jsonData.monthlyIncome = monthlyIncome;
+		await saveData();
+		showToast('Pendapatan bulanan disimpan');
+		evaluateAssets(); // Perbarui penilaian aset
+		evaluateExpenses(); // Perbarui penilaian pengeluaran
+	}
 
     function loadData() {
 		const storedData = localStorage.getItem('data');
@@ -623,6 +646,10 @@
 		document.getElementById('startDate').value = currentMonthString;
 		document.getElementById('endDate').value = currentMonthString;
 		return Promise.resolve();
+		
+		if (jsonData.monthlyIncome) {
+			document.getElementById('monthlyIncomeInput').value = jsonData.monthlyIncome.toLocaleString('id-ID');
+		}
 	}
 
     function saveData() {
@@ -859,7 +886,7 @@
     }
 
     function evaluateAssets() {
-        const monthlyIncome = 4700000;
+		const monthlyIncome = jsonData.monthlyIncome || 4700000;
         const totalAssets = Object.values(data).reduce((sum, cat) => sum + Object.values(cat).reduce((sum, val) => sum + (parseFloat(val) || 0), 0), 0);
         const categoryTotals = {};
         const categoryPercentages = {};
