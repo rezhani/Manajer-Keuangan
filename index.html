@@ -393,7 +393,7 @@
                 <div class="section">
                     <h3>➕ Tambah Item</h3>
                     <input type="text" id="itemName" placeholder="Nama item">
-                    <input type="text" id="itemValue" placeholder="Nilai (Rp)" min="0" max="100000000" oninput="formatNumber(this)">
+                    <input type="number" id="itemValue" placeholder="Nilai (Rp)" min="0" max="100000000">
                     <select id="itemCategory">
                         <option value="Investasi">Investasi</option>
                         <option value="Aset Konsumtif">Aset Konsumtif</option>
@@ -404,7 +404,7 @@
                 <div class="section">
                     <h3>✏️ Edit Item</h3>
                     <select id="editItemSelect" onchange="fillEditValue()"></select>
-                    <input type="text" id="editItemValue" placeholder="Harga baru" min="0" max="100000000" oninput="formatNumber(this)">
+                    <input type="number" id="editItemValue" placeholder="Harga baru" min="0" max="100000000">
                     <button onclick="updateItem()">Update Nilai</button>
                 </div>
                 <div class="section">
